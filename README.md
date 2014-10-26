@@ -3,10 +3,12 @@ Vedor.js
 
 Vendor.js it's another way to use AMD on frontend.
 
-## Usage
+## Connect to page
 Put vendor.js to main folder of your project. Connect vendor.js to your page:
 ```html
 <script src="myproject/vendor.js"></script>
+
+## Usage
 ```
 _Now, baseUrl is automaticly 'myproject/' and you can include files from this:_
 ```javascript
