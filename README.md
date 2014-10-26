@@ -59,7 +59,7 @@ includecss("css/main.css");
 
 ### baseUrl
 By defaults Vendor.js choose `baseUrl` which contains the vendor.js. Don't rename file `vendor.js`! This name is a anchor to search base location.
-But you can configure this option manualy:
+But if you will, you can configure this option manualy:
 ```
 include.config({
     baseUrl: 'mynewfolder/scripts/'
