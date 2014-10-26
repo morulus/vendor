@@ -130,7 +130,7 @@ if (typeof window.include != "function") {
 			                var j = document.createElement("SCRIPT");
 			               
 			                j.setAttribute("type", "text/javascript");
-			                j.setAttribute("async", false);
+			                j.setAttribute("async", true);
 			             };
 			              	/* (!) Возможно depricated функция */
 							var define = function(f) {
@@ -536,11 +536,12 @@ if (typeof window.include == "function" && typeof window.include.brahmaInside ==
 				var i = g[j].attributes[srci].value.toLowerCase();
 				var h = i.split("vendor.js");
 				var f = document.location.href.split("/");
+
 				f.pop();
 				f = f.join("/");
-				
+
 				window.include.config({
-					baseUrl: f + "/" + h[0]
+					baseUrl: (h[0].substr(0,5)=='http:') ? h[0] : (f + "/" + h[0])
 				});
 				// import
 				include.selfLocationdefined = true;
