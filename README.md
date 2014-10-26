@@ -7,9 +7,8 @@ Vendor.js it's another way to use AMD on frontend.
 Put vendor.js to main folder of your project. Connect vendor.js to your page:
 ```html
 <script src="myproject/vendor.js"></script>
-
-## Usage
 ```
+## Usage
 _Now, baseUrl is automaticly 'myproject/' and you can include files from this:_
 ```javascript
 include('js/myscript.js');
