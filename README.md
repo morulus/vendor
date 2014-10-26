@@ -52,8 +52,8 @@ define('mymodule', ['js/myscript.js'], function() {
 });
 ```
 ### Include css files
-```javascript
 You can include CSS file like Js files with function includecss(string || array)
+```javascript
 includecss("css/main.css");
 ```
 
