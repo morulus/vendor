@@ -70,8 +70,8 @@ This script will include file `mynewfolder/scripts/foo.js'
 include('foo');
 ```
 
-### Alias
-To use alias use config.paths like in Require.js.
+### Aliases
+You can set aliases with config.paths like in Require.js.
 ```
 include.config({
     paths: {
@@ -81,12 +81,11 @@ include.config({
 include('jquery');
 ```
 
-
-## Why?
-What different between Requirejs? — you can say. Simple reasons — lighter and not so strict.
-
 ## Browsers supports
 Chrome,FF,Opera,Safari,webkit's browser in short, IE9+
 
 ## Author
 Vladimir Morulus (https://github.com/morulus/)
+
+## Why reinvent the wheel??
+What different between Requirejs, for example? — you can say. Simple reasons — lighter and not so strict. Anywat, I created this library for their own reasons, to use it or not - your business.
