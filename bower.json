@@ -1,0 +1,20 @@
+{
+  "name": "vendor",
+  "version": "1.0.0",
+  "authors": [
+    "Morulus <vladimirmorulus@gmail.com>"
+  ],
+  "description": "Another way to use AMD at front",
+  "main": "vendor.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "amd",
+    "vendor",
+    "include",
+    "define"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/morulus/vendor"
+}
