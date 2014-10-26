@@ -8,7 +8,7 @@ Put vendor.js to main folder of your project. Connect vendor.js to your page:
 ```html
 <script src="myproject/vendor.js"></script>
 ```
-_Now, baseUrl is automaticly 'myproject/' and you can include files from this:
+Now, baseUrl is automaticly 'myproject/' and you can include files from this:
 
 ### Include js files
 ```javascript
