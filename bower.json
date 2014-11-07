@@ -6,10 +6,10 @@
   ],
   "description": "Another way to use AMD at front",
   "main": "vendor.js",
-  "ignore": {
+  "ignore": [
     "*.MD",
     "dist"
-  }
+  ],
   "moduleType": [
     "globals"
   ],
