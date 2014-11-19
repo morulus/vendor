@@ -14,11 +14,11 @@ Array.prototype.indexOf = function(obj, start) {
 }
 
 if (typeof window.include != "function") {
-	window.include = function(c, b, phantom) {
+	window.include = window.require = function(c, b, phantom) {
 
 		var phantom = phantom || false;
 		var a = new function(e, d) {
-
+			
 			if (typeof e == "string") {
 				e = [e]
 			}
@@ -184,9 +184,14 @@ if (typeof window.include != "function") {
 					              	/* Чистим память */
 					              	j.onload = j.onreadystatechange = null;
 					              	/* Удаляем скрипт */
-					              	(function() {
-					                  return document.documentElement || document.getElementsByTagName("HEAD")[0];
-					                })().removeChild(j);
+					              	try {
+						              	(function() {
+						                  return document.documentElement || document.getElementsByTagName("HEAD")[0];
+						                })().removeChild(j);
+						            } catch(e) {
+						            	if (typeof console=="object" && "function"==typeof console.log)
+						            	console.log('vendor.js: script node is already removed by another script', j);
+						            }
 				               	 };
 				              };
 
@@ -539,9 +544,10 @@ if (typeof window.include == "function" && typeof window.include.brahmaInside ==
 
 				f.pop();
 				f = f.join("/");
+				if (f.substr(-1)=='/') f = f.substr(0,-1);
 
 				window.include.config({
-					baseUrl: (h[0].substr(0,5)=='http:') ? h[0] : (f + "/" + h[0])
+					baseUrl: (h[0].substr(0,5)=='http:') ? h[0] : (f + (h[0].substr(0,1)=='/' ? '' : '/') + h[0])
 				});
 				// import
 				include.selfLocationdefined = true;
