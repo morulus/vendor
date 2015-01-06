@@ -190,7 +190,7 @@ if (typeof window.include != "function") {
 						                })().removeChild(j);
 						            } catch(e) {
 						            	if (typeof console=="object" && "function"==typeof console.log)
-						            	console.log('vendor.js: script node is already removed by another script', j);
+						            	if (window.include.debugMode) console.log('vendor.js: script node is already removed by another script', j);
 						            }
 				               	 };
 				              };
