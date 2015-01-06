@@ -510,7 +510,8 @@ if (typeof window.includecss != "function") {
 		}
 		for (var c = 0; c < b.length; c++) {
 			var a = b[c].substr(b[c].length - 4, 4) != ".css" ? b[c] + ".css" : b[c];
-			(a.substr(0,5).toLowerCase()!='http') && (a = window.include._config.baseUrl+a);
+
+			(a.substr(0,4).toLowerCase()!='http') && (a = window.include._config.baseUrl+a);
 			var d = function() {
 				return document.documentElement || document.getElementsByTagName("HEAD")[0]
 			}().appendChild(document.createElement("LINK"));
