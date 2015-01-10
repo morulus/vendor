@@ -46,10 +46,14 @@ if (typeof window.include != "function") {
 
 					/* Если данный адрес уже был загружен, то пропускаем этам загрузки и сразу сообщаем, что компонент загружен */
 					try {
+
 						if (window.include._defined.indexOf(f) > -1) {
+
 							h.loaded(k);
 							continue;
-						};
+						} else {
+
+						}
 					} catch(e) {
 						/* IE 8 */
 						
@@ -57,12 +61,10 @@ if (typeof window.include != "function") {
 
 					/* --- Continue: элемент был найден в списках загруженных элементов */
 					/* ---------------------------------------------------------------- */
-
+					
 
 					/* Проверяем надичие элемента в списке define.modules. Ведь запрашиваемвый элемент мог быть просто предопределен через define. */
 					if ('undefined' != typeof window.define._modules[g]) {
-						
-						
 						h.loaded(k);
 						continue;
 					};
@@ -143,7 +145,7 @@ if (typeof window.include != "function") {
 
 				              /* Определяем функцию, которая так или иначе будет выполнена при загрузке ресурса */
 				              var lse = function() {
-				              
+				              	
 				              	if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
 					              	/* Если внутри ресурса была определена функция define с зависимостями, значит помимо загрузки основного скрипта нам нужно ждать так же загрузки саб-ресурсов.
 					              	Т.е. если происходит внутренний include, мы должны ждать его завершения. 
@@ -177,7 +179,13 @@ if (typeof window.include != "function") {
 					              		/* Если last - функция, мы должны выполнить её передав callback код завершения загрузки данного модуля */
 
 					              		window.define._last(ok);
-					              		window.define._last = false;
+
+					              		/* 
+					              		! window.define._last = false; 
+					              		Данная процедура была удалена из-за совместимости с IE9. Необходимо провести тщательные тесты касательно
+					              		данной функции.
+					              		*/
+
 					              	} else {
 					              		ok();
 					              	};
@@ -199,6 +207,7 @@ if (typeof window.include != "function") {
 				              /* Определяем метод распознавания загрузки */				        
 				              if (asynch) {
 				              	/* Загрузка созданного на лету элемента SCRIPT */
+
 				                j.onload = j.onreadystatechange = lse;
 				              }
 				              else {
@@ -283,7 +292,9 @@ if (typeof window.include != "function") {
 				this.loads--;
 				
 				if (this.loads < 1) {
+
 					if (typeof this.callback == "function") {
+
 						var h = [];
 						
 						for (var g = 0; g < this.fabrics.length; g++) {
@@ -364,136 +375,103 @@ if (typeof window.include != "function") {
 	}
 }
 if (typeof window.define != "function") {
-	/* define обеспечивает поддержку технологии AMD 
-	define(имя компонента, зависимости, фабрика)
-	define(имя компонента, фабрика)
-	define(зависимости, фабрика)
-	*/
-	window.define = function(g, e, b, overwrite) {
-
-		var overwrite = overwrite || false; // Remove old value and set new
-		var b = b,
-			g = g;
-		if (arguments.length==1) { b=g; g=null,e=0,overwrite=null }
-		else if (arguments.length==2) {
-			("object"==typeof g) && (b=e,e=0,g=null,overwrite=null);
-			("string"==typeof g) && (b=e,e=0,overwrite=null);
-		}
-		else {
-			"string" != typeof g && (overwrite = b, b = e, e = g, g = null);
-			!(e instanceof Array) && (overwrite = b, b = e, e = 0);
-
-			/*	Очищаем modules[g] если имя присутствует */
-			(g!=null) && (delete window.define._modules[g]);
-		}
-
-		/* Зависимости храняться в переменной e. Если она не указана или не является массивом, то e принимает значние 0. */
 		
-		var c = function(d) {
-					
-			d == null && (d = ("function" == typeof b ? b() : b));
+	window.define = function(g, e, b) {
+		
+		// Если передана только фабрика
+		if (arguments.length==1) {
+			b=g; g=null; e=null;
+		}
 
-			g != null && (window.define._modules[g] = {
-				fabric: d
-			});
+		// Если передано два аргумента
+		else if (arguments.length==2) {
+			// Переданы зависимости и фабрика
+			("object"==typeof g) && (b=e,e=g,g=null);
+			// Передано имя и фабрика
+			("string"==typeof g) && (b=e,e=0);
+		}
+		// Переданы все аргументы
+		else {
+			"string" != typeof g && (b = e, e = g, g = null);
+			!(e instanceof Array) && (b = e, e = 0);
+		}
 
-			return d;
-		};
+		// Формируем humanfrendly переменные
+		var name = g || null;
+		var depends = e || null;
+		var fabric = b || null;
 
-		/* Проверяем инициализирован ли уже этот компонент 
-		Переменная a будет содержать fabric модуля */
-		var a = g != null ? (function(d) {
+		// После того как include выполняет модуль переменная initialed принимает значение true
+		// Если этого не происходит, то черещ 0,010 секунду выполнение модуля происходит автоматически
+		// (см. #autoexecute)
+		var initialed = false;
 
-			return ("object" == typeof window.define._modules[d]) ? window.define._modules[d].fabric : null
-		})(g) : null;
-
-
-		window.define._last = function(callback) {
-			switch(typeof b) {
-				case 'function':
-					callback(b());
+		// Функция генерирует фабрику
+		var initial = function() {
+			initialed = true;
+			window.define.synchCode = null;
+			switch(typeof fabric) {
+				case "function":
+					var product = fabric.apply(window, arguments);
 				break;
 				default:
-					callback(b);
+					var product = fabric;
 				break;
+			}
+
+			// Здесь происходит присваивание фабрики
+
+			if (name) {
+				window.define._modules[name] = {
+					fabric: product
+				}
+			}
+
+			return product;
+		}
+
+		// Генерируем код синхроного исполнения, который будет удален функцией include, в случае успешного присваивания модуля имени файла
+		var synchCode = window.define.synchCode = Math.random();
+
+		// В случае отсутствия имени, мы предполагаем, что данная функция вызывана из подключаемого файла, поэтому её активацию необходимо передать в специальную функцию _last, которая будет выполнена объектом include, сразе загрузки файла
+
+		if (depends) {
+			// В случае если у данного модуля присутствуют зависимости, нам необходимо вначале загрузить их, а уже после производить активацию модуля
+			var execute = function(callback) {
+
+				var callback = callback;
+				include(depends, function() {
+					// Передаем в callback продукт фабрики
+					callback(initial.apply(window, arguments));
+				});
 			};
-		};
-		a == null ? (function(h, f) {
 
-
-			h == 0 ? (function(d) {
-				var d = d;
-
-				window.define._last = function(callback) {
-					
-					callback(d());
-				};
-				//d() // DEPRICATED.
-			})(f) : (function(j, i) {
-				var j = j;
-				var i = i;
-				/* Если зависимости есть, нам необходимо отложить присваиваение функции define fabric */
-				window.define._last = function(callback) {
-
-					var callback = callback;
-					
-					include(j, function() {
-						
-						/* Теперь когда мы получили подгрузку зависимостей мы можем определить _modules 
-						Определяем что вернуло нам defined */
-
-						switch(typeof b) {
-							case "function":
-
-								defined = b.apply(this, arguments);
-
-							break;
-							default: 
-								defined = b; // Это может быть объект, да всё что угодно.
-							break;
-						};
-						/* После того как зависимости загружены нам необходимо присвоить к списку modules данный ресурс */
-						if (g!=null && "undefined" == window.define._modules[g]) {
-							
-							window.define._modules[g] = defined;
-						} else {
-							
-						};
-
-						/* Если нам передан callback, то производим его вызов с передачей defined */
-
-						callback(defined);
-					});
-				};
-				
-			})(h, f)
-		})(e, c) : c(a)
-	};
-	window.define.force = function(name, depends, fabric) {
-		/* Использование функции предполагает, что все depends уже присутствуют в define._modules.
-		Здесь нам необходимо создать define._modules[name].fabric со значение fabric.apply() */
-		var result = null;
-		(fabric==null) & (result = depends, fabric=null)
-
-		if (fabric==null) {
-			var fab = {
-				fabric: result
-			};
 		} else {
-			var args = [];
-			if (depends instanceof Array) {
-				for (var i =0;i<depends.length;i++) {
-					("object" == typeof define._modules[depends[i]]) ? (args.push(define._modules[depends[i]].fabric)) : (args.push(null));
-				};
-			};
-			var fab = {
-				fabric: fabric.apply(this, args)
-			};
+
+			var execute = function(callback) {
+
+				callback(initial.apply(window, arguments));
+			}
+
+			// Дополнительный функционал для обеспечения использования define без асинхронной загрузке
+			initial();
+		}
+
+		window.define._last = execute;
+
+		// #autoexecute
+		// Защита от использования функции define в синхронных файлах
+		// Мы должны выполнить модуль сами, если это не сделал функционал include, сразу после вызова define
+		// Исключением является случай когда у нас отсутствуют зависимости и указано имя, в таком случае мы можем инициализировать модуль моментально
+		if (depends===null && name!==null) {
+			execute(function(){});
+		} else {
+			setTimeout(function() {
+				if (!initialed) execute(function(){});
+			}, 10);
 		};
-
-		define._modules[name] = fab;
-
-	};
+	}
+	
 
 	window.define._modules = {
 		'module' : null,
@@ -520,6 +498,19 @@ if (typeof window.includecss != "function") {
 			d.href = a
 		}
 	}
+}
+window.include.getJson = function(path, callback) {
+	var xobj = new XMLHttpRequest();
+    if (xobj.overrideMimeType) xobj.overrideMimeType("application/json");
+	xobj.open('GET', path, true); // Replace 'my_data' with the path to your file
+	xobj.onreadystatechange = function () {
+          if (xobj.readyState == 4 && xobj.status == "200") {
+            // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+            var actual_JSON = JSON.parse(xobj.responseText);
+            callback(actual_JSON);
+          }
+    };
+    xobj.send(null); 
 }
 if (typeof window.include == "function" && typeof window.include.brahmaInside == "boolean") {
 
