@@ -1,0 +1,99 @@
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900&subset=latin,cyrillic);
+
+body {
+	background:url(../images/bg.jpg) top center repeat transparent;
+	font-family:"Roboto";
+	font-size:23px;
+	font-weight: 200;
+	color:#ffa133;
+	padding-top:50px;
+}
+
+section {
+	margin-bottom:50px;
+}
+
+a {
+	color:rgb(255, 116, 0);
+	text-decoration:none;
+}
+
+h4 {
+	font-weight: 200;
+	font-size:23px;
+	color:white;
+}
+
+pre > code {
+	background-color:#e27c03;
+	border-radius:12px;
+	padding:12px;
+	display:block;
+	color:black;
+	word-break: break-word;
+	word-wrap: break-word;
+	overflow: hidden;
+	white-space: pre-wrap;
+} 
+
+img.logo {
+	margin:0 0 12px 0;
+}
+
+summary.white {
+	font-size:30px;
+	color:white;
+}
+
+.centered {
+	
+}
+
+.centered > img {
+	width:90%;
+}
+
+a.contact {
+	position: relative;
+}
+
+a.contact > img {
+	position:absolute;
+	bottom:100%;
+	left:0px;
+	opacity:1;
+	transform-origin:50% 100%;
+	-webkit-transition:-webkit-transform 0.6s cubic-bezier(0.755, 0.05, 0.855, 0.06);
+	-ms-transition:transform 0.6s cubic-bezier(0.755, 0.05, 0.855, 0.06);
+	transition:transform 0.6s cubic-bezier(0.755, 0.05, 0.855, 0.06);
+	transform-style: preserve-3d;
+	transform: perspective( 600px ) rotateX( 90deg );
+	border:0px;
+}
+
+
+a.contact:hover >img {
+	transform: perspective( 600px ) rotateX( 0deg );
+
+	-webkit-transition:-webkit-transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	-ms-transition:transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	transition:transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+article.downloads {
+		background-color:black;
+		padding:40px;
+		text-align:center;
+}
+
+article.downloads > a{
+	color: rgb(255, 116, 0);
+	font-size: 20px;
+	text-decoration: none;
+	display: inline-block;
+	padding: 0 10px;
+}
+
+article.downloads > a:hover {
+	text-decoration:underline;
+}
