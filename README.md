@@ -97,7 +97,7 @@ vendor.config({
         'jquery': 'vendor/jquery/dist/jquery'
     }
 });
-require('jquery');
+vendor('jquery');
 ```
 
 ## Browsers supports
