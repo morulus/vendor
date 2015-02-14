@@ -8,7 +8,11 @@
   "main": "vendor.js",
   "ignore": [
     "*.MD",
-    "dist"
+    "dist",
+    "*.html",
+    "images",
+    "style",
+    ".htaccess"
   ],
   "moduleType": [
     "globals"
