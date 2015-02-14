@@ -108,3 +108,6 @@ Vladimir Morulus (https://github.com/morulus/)
 
 ## Why reinvent the wheel??
 What different between Requirejs, for example? — you can say. Simple reasons — the existence of Coca-Cola exclude the existence of other drinks? Good day.
+
+## P.S
+Sorry my english.
