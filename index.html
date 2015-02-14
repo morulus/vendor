@@ -80,7 +80,7 @@ mv /bower_components/vendor/vendor.js vendor.js</code></pre>
 					<summary>Весь функционал доступен через единую функцию vendor(). Т.е. вы можете не писать вызов методов require, requirecss, images, bower, что бы загрузить определенный тип файлов. Просто расскажите функции vendor, что вам нужно загрузить и она это сделает.</summary>
 					<pre><code class="javascript">vendor(['go.js','go.png','bower/jquery','go.css'], 
 		function(module, image, jquery) {
-			// Все файлы загружены
+			// Все файлы загружены!
 		}
 	);</code></pre>
 					<summary>Для загрузки bower-компонентов через функцию vendor необходимо указывать префикс bower/.</summary>
