@@ -13,6 +13,15 @@ body {
 	margin-left:-10px;
 }
 
+.row {
+	-webkit-transition:margin 1s ease;
+	transition:margin 1s ease;
+}
+
+.row > * {
+
+}
+
 section {
 	margin-bottom:50px;
 }
@@ -85,6 +94,7 @@ a.hint {
 }
 
 a.hint > * {
+	display:none;
 	position:absolute;
 	bottom:100%;
 	left:0px;
@@ -101,6 +111,7 @@ a.hint > * {
 
 
 a.hint:hover > * {
+	display:block;
 	transform: perspective( 600px ) rotateX( 0deg );
 	-webkit-transition:-webkit-transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	-ms-transition:transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
