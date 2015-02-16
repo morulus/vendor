@@ -76,11 +76,11 @@ summary ditails {
 	width:90%;
 }
 
-a {
+a.hint {
 	position: relative;
 }
 
-a > .hint {
+a.hint > * {
 	position:absolute;
 	bottom:100%;
 	left:0px;
@@ -96,7 +96,7 @@ a > .hint {
 }
 
 
-a:hover >.hint {
+a.hint:hover > * {
 	transform: perspective( 600px ) rotateX( 0deg );
 	-webkit-transition:-webkit-transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	-ms-transition:transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);

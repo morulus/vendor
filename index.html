@@ -19,7 +19,7 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<img src="images/vendorjs.png" alt="" class="logo" />
-					<summary class="white">
+					<summary class="white" id="descript">
 						Асинхронный загрузчик js-файлов, модулей, компонентов, стилей и изображений для использования в front-end приложениях.
 					</summary>
 
@@ -107,7 +107,7 @@
 							<summary><strong>Сокращенное указание на компонент</strong></summary>
 							<pre><code class="javascript">vendor.bower(['bower//jquery'], function($) {
 });</code></pre>
-							<summary>Использование специального префикса <code>bower//</code> (этот способ является рекомендуемым). В этом случае скрипт ищет компонент в директории bower_components корня сайта, если в корне сайта отсутствует файл .bowerrc. Если <a href="http://bower.io/docs/config/" target="_blank">.bowerrc<img src="images/bower.jpg" width="100%" class="hint" /></a> присутствует, то скрипт вначале анализирует его данные, получая сведения о местонахождении директории с компонентами bower.</summary>
+							<summary>Использование специального префикса <code>bower//</code> (этот способ является рекомендуемым). В этом случае скрипт ищет компонент в директории bower_components корня сайта, если в корне сайта отсутствует файл .bowerrc. Если <a href="http://bower.io/docs/config/" target="_blank" class="hint">.bowerrc<img src="images/bower.jpg" width="100%" /></a> присутствует, то скрипт вначале анализирует его данные, получая сведения о местонахождении директории с компонентами bower.</summary>
 												
 						</div>
 					</div>
@@ -131,7 +131,7 @@
 					<summary>Но нам не хотелось бы каждый раз прописывать весь путь, мы просто хотим подключить соседний файл. Для решения этой задачи в VendorJs реализована поддержка привязки локаций к модулям. И мы может просто указать соседний файл:</summary>
 					<pre><code class="javascript">define(['./mouse.js'], function(mouse) {});</code></pre>
 					<summary>Для того, что бы путь начал расчитывать от нашего текущего местоположения, необходимо вначале пути указать точку со слешем <code>./</code>. Этот префикс даст знать скрипту, что искать требуемый путь стоит искать в той же директории, в которой и находится файл, вызывавший эту функцию.</summary>
-					<summary>В виду особенностей интерпритатора Javascript, данная возможность может быть использована только в функции define() внутри модуля. А так же это недопустимо внутри остроченных участков кода. <a class="spy">Javascript - язык, гулящий во времени<div class="hint"><img src="images/bttf.jpg" /></div></a>: мы можем отложить выполнение участка кода функцией setTimeout или через XMLHttpRequest на неопределенный срок. Стоит это сделать - и мы теряем корни, т.е. следующая конструкция не сработает:</summary>
+					<summary>В виду особенностей интерпритатора Javascript, данная возможность может быть использована только в функции define() внутри модуля. А так же это недопустимо внутри остроченных участков кода. <a class="spy hint">Javascript - язык, гулящий во времени<div><img src="images/bttf.jpg" /></div></a>: мы можем отложить выполнение участка кода функцией setTimeout или через XMLHttpRequest на неопределенный срок. Стоит это сделать - и мы теряем корни, т.е. следующая конструкция не сработает:</summary>
 					<pre><code class="javascript">setTimeout(function() { 
 	define(['./deeper/mouse.js'], function(mouse) {}); // Я не знаю где я и не уверен кто я
 }, 10);</code></pre>
@@ -172,13 +172,23 @@
 					<summary>У меня очень мало времени на разработку, поэтому я бы был благодарен за любую помощь в поисках ошибок и форках.</summary>
 					<summary>Сообщить об ошибке: <a href="https://github.com/morulus/vendor/issues">https://github.com/morulus/vendor/issues</a></summary>
 					<summary>Форкнуть: <a href="https://github.com/morulus/vendor">https://github.com/morulus/vendor</a></summary>
+					<summary>Реклама:  <span>
+							<!-- Put this script tag to the <head> of your page -->
+<script type="text/javascript" src="http://vk.com/js/api/share.js?90" charset="windows-1251"></script>
+
+<!-- Put this script tag to the place, where the Share button will be -->
+<script type="text/javascript"><!--
+document.write(VK.Share.button({url: "http://morulus.github.io/vendor/"},{title: "VendorJs", descript: document.getElementById("descript").innerText, type: "round_nocount", text: "Сохранить", image: "http://vendorjs.project/combat/images/vendorjs.png"}));
+--></script>
+						</span>
+					</summary>
 				</div>
 			</div>
 		</div>
 	</section>
 	<section>
 		<div class="container">
-				<article>Автор библиотеки VendorJs — <a href="http://github.com/morulus/" title="Vladimir Kalmykov (@morulus)" class="contact">@morulus<img class="hint" src="images/morulus.png" /></a>. Версия: <span class="version" id="version">1.4</span></article>
+				<article>Автор библиотеки VendorJs — <a href="http://github.com/morulus/" title="Vladimir Kalmykov (@morulus)" class="contac hint">@morulus<img src="images/morulus.png" /></a>. Версия: <span class="version" id="version">1.4</span></article>
 		</div>
 	</section>
 	<a href="https://github.com/morulus/vendor/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
