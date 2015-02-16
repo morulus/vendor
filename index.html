@@ -8,11 +8,15 @@
 	<meta name="keywords" content="amd require define vendorjs vendor bower javascript">
 	<link rel="stylesheet" href="style/patch-layout.css" />
 	<link rel="stylesheet" href="style/main.css" />
+	<link rel="image_src" href="images/vendorjs.png">
+
 	
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/zenburn.min.css" />
+	
 	<script src="dist/vendor.js" baseurl="" no-bower></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/javascript.min.js"></script>
+	<script type="text/javascript" src="http://vk.com/js/api/share.js?90" charset="windows-1251"></script>
 	<script>hljs.initHighlightingOnLoad();</script>
 </head>
 <body>
@@ -20,8 +24,8 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-sm-6">
-					<img src="images/vendorjs.jpg" alt="">
-					<img src="images/vendorjs.png" alt="" class="logo" />
+					
+					<img src="images/vendorjs.png" alt="" class="banner" id="banner" alt="vendorJs" />
 					<summary class="white" id="descript">
 						Асинхронный загрузчик js-файлов, модулей, компонентов, стилей и изображений для использования в front-end приложениях.
 					</summary>
@@ -175,23 +179,23 @@
 					<summary>У меня очень мало времени на разработку, поэтому я бы был благодарен за любую помощь в поисках ошибок и форках.</summary>
 					<summary>Сообщить об ошибке: <a href="https://github.com/morulus/vendor/issues">https://github.com/morulus/vendor/issues</a></summary>
 					<summary>Форкнуть: <a href="https://github.com/morulus/vendor">https://github.com/morulus/vendor</a></summary>
-					<summary>Реклама:  <span>
-							<!-- Put this script tag to the <head> of your page -->
-<script type="text/javascript" src="http://vk.com/js/api/share.js?90" charset="windows-1251"></script>
-
-<!-- Put this script tag to the place, where the Share button will be -->
+					<summary><strong>Реклама:</strong>
+						<p><!-- Put this script tag to the place, where the Share button will be -->
 <script type="text/javascript"><!--
 document.write(VK.Share.button({
-		url: "http://morulus.github.io/vendor/", 
-		title: "VendorJs", 
-		descript: document.getElementById("descript").innerText, 
-		image: "http://morulus.github.io/vendor/images/vendorjs.jpg",
-		noparse: true
-	},
-	{type: "round_nocount", text: "Поделиться"}));
+	url: "http://morulus.github.io/vendor/",
+	title:document.getElementsByTagName('title')[0].innerText,
+	image:"http://morulus.github.io/vendor/images/vendorjs.png",
+	description: document.getElementById('descript').innerText,
+	noparse: true
+},{type: "button_nocount", text: "Запостить"}));
 --></script>
-						</span>
-					</summary>
+						</p>
+				</summary>
+					
+					
+
+
 				</div>
 			</div>
 		</div>
