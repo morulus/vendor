@@ -8,7 +8,7 @@
 	<meta name="keywords" content="amd require define vendorjs vendor bower javascript">
 	<link rel="stylesheet" href="style/patch-layout.css" />
 	<link rel="stylesheet" href="style/main.css" />
-	<link rel="image_src" href="images/vendorjs.png">
+	<link rel="image_src" href="images/vendorjs.jpg">
 
 	
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/zenburn.min.css" />
@@ -175,22 +175,26 @@
 					</script>
 				</div>
 				<div class="col-md-12">
-					<h1>Помощь в разработке</h1>
+					<h4>Помощь в разработке</h4>
 					<summary>У меня очень мало времени на разработку, поэтому я бы был благодарен за любую помощь в поисках ошибок и форках.</summary>
 					<summary>Сообщить об ошибке: <a href="https://github.com/morulus/vendor/issues">https://github.com/morulus/vendor/issues</a></summary>
 					<summary>Форкнуть: <a href="https://github.com/morulus/vendor">https://github.com/morulus/vendor</a></summary>
-					<summary><strong>Реклама:</strong>
-						<p><!-- Put this script tag to the place, where the Share button will be -->
-<script type="text/javascript"><!--
-document.write(VK.Share.button({
-	url: "http://morulus.github.io/vendor/",
-	title:document.getElementsByTagName('title')[0].innerText,
-	image:"http://morulus.github.io/vendor/images/vendorjs.png",
-	description: document.getElementById('descript').innerText,
-	noparse: true
-},{type: "button_nocount", text: "Запостить"}));
---></script>
-						</p>
+					<summary>
+						<h5>Раскрутка:</h5>
+						<div class="bar">
+							<span><!-- Put this script tag to the place, where the Share button will be -->
+	<script type="text/javascript"><!--
+	document.write(VK.Share.button({
+		url: "http://morulus.github.io/vendor/",
+		title:document.getElementsByTagName('title')[0].innerText,
+		image:"http://morulus.github.io/vendor/images/vendorjs.png",
+		description: document.getElementById('descript').innerText,
+		noparse: true
+	},{type: "button_nocount", text: "Запостить"}));
+	--></script>
+							</span>
+							<span><div class="fb-share-button" data-href="http://morulus.github.io/vendor/" data-layout="button"></div></span>
+						</div>
 				</summary>
 					
 					
@@ -206,10 +210,20 @@ document.write(VK.Share.button({
 		</div>
 	</section>
 	<a href="https://github.com/morulus/vendor/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+	<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/ru_RU/sdk.js#xfbml=1&appId=480157075396856&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
 </body>
 <script>
 	vendor.getJson('bower.json', function(info) { 
 		document.getElementById('version').innerHTML = info.version;
 	});
+
+
 </script>
 </html>
