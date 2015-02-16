@@ -137,6 +137,10 @@ article.downloads > a{
 	color:white;
 }
 
+article.downloads > a.dist {
+	color:rgb(57, 34, 165);
+}
+
 article.downloads > a:hover {
 	text-decoration:underline;
 }
