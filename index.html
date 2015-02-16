@@ -3,7 +3,9 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Vendor.js</title>
+	<title>VendorJs - Javascript resources loader</title>
+	<meta name="description" content="Асинхронный загрузчик js-файлов, модулей, компонентов, стилей и изображений для использования в front-end приложениях.">
+	<meta name="keywords" content="amd require define vendorjs vendor bower javascript">
 	<link rel="stylesheet" href="style/patch-layout.css" />
 	<link rel="stylesheet" href="style/main.css" />
 	
@@ -178,7 +180,13 @@
 
 <!-- Put this script tag to the place, where the Share button will be -->
 <script type="text/javascript"><!--
-document.write(VK.Share.button({url: "http://morulus.github.io/vendor/"},{title: "VendorJs", descript: document.getElementById("descript").innerText, type: "round_nocount", text: "Сохранить", image: "http://vendorjs.project/combat/images/vendorjs.png"}));
+document.write(VK.Share.button({
+		url: "http://morulus.github.io/vendor/", 
+		title: "VendorJs", 
+		descript: document.getElementById("descript").innerText, 
+		image: "images/vendorjs.png"
+	},
+	{type: "round_nocount", text: "Поделиться"}));
 --></script>
 						</span>
 					</summary>
