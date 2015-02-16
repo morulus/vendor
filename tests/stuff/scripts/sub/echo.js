@@ -1,0 +1,1 @@
+define('Im echo')

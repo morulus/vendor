@@ -8,7 +8,7 @@
 	<link rel="stylesheet" href="style/main.css" />
 	
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/zenburn.min.css" />
-	<script src="vendor.js" no-bower></script>
+	<script src="dist/vendor.js" baseurl="" no-bower></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/languages/javascript.min.js"></script>
 	<script>hljs.initHighlightingOnLoad();</script>
@@ -20,93 +20,166 @@
 				<div class="col-sm-6">
 					<img src="images/vendorjs.png" alt="" class="logo" />
 					<summary class="white">
-						Асинхронный загрузчик js-файлов, модулей, css и изображений для использования в браузерных приложениях.
+						Асинхронный загрузчик js-файлов, модулей, компонентов, стилей и изображений для использования в front-end приложениях.
 					</summary>
-					<summary>Vendor.js доступен через Bower. Однако для удобства работы с ним, сам файл vendor.js вам необходимо будет переместить в директорию, которая будет являться "домашней" для ваших ресурсов.</summary>
-					<pre><code>bower install vendor
-mv /bower_components/vendor/vendor.js vendor.js</code></pre>
-				</div>
-				<div class="col-sm-6">
-					<h4>Простое подключение без дополнительных настроек</h4>
-					<pre><code>&lt;script src=&quot;vendor.js&quot;&gt;&lt;/script&gt;</code></pre>
-					<summary>Vendor воспринимает директорию, в которой находится файл vendor.js, в качестве «домашней». Т.е. сам файл vendor.js следует разместить в корневой директории сайта или директории, в которой сосредоточены ресурсы.</summary>
-					<summary>Все относительные пути будут расчитываться относительно директории, в которой лежит vendor.js:</summary>
-					<pre><code>vendor(['scripts/myscript.js','styles/main.css'], handler);</code></pre>
-				</div>
-				<div class="col-sm-12">
+
 					<article class="downloads">
 						<a href="vendor.js">Скачать сжатую версию (14 kb)</a> <a href="dist/vendor.js">Скачать дистрибутив [developer only]</a> 
 					</article>
-						
-				</div>				
-				<div class="col-sm-6 centered">
-					<h4>Прелоудер изображений</h4>
-					<summary>Вы можете создавать предварительные загрузки изображений, получая их объекты в качестве аргументов callback-функции.</summary>
-					<pre><code class="javascript">vendor.images(['images/mypic1.jpg','images/mypic2.jpg'], function(pic1,pic2) {
-		// Фотографии загружены
-	});</code></pre>
 					
+				</div>
+				<div class="col-sm-6">
+					<h4>Подключение и настройка</h4>
+					<pre><code>&lt;script src=&quot;vendor.js&quot;&gt;&lt;/script&gt;</code></pre>
+					<summary>Директория, в которой находится файл vendor.js по-умолчанию воспринимается как корневая папка проекта. Относительные пути в запросах будут формироваться по схеме <ditails>[месторасположение файла vendor.js]/[относительный путь]</ditails></summary>
+					
+					<pre><code>vendor('scripts/myscript.js', handler); 
+// [месторасположение файла vendor.js]/scripts/myscript.js</code></pre>
+					
+					<summary>VendorJs спроектирована как инструмент с "быстрым стартом", поэтому требует минимум настроек или их полное отсутствие. Сразу после подключения, библиотека готова к работе, однако вам может понадобится принудительно указать корневую директорию вашего пректа и сделать это можно через атрибут `baseurl` тэга &lt;SCRIPT&gt;</summary>
+					<pre><code>&lt;script src=&quot;bower_components/vendor/vendor.js&quot; baseurl=&quot;app/&quot; &gt;&lt;/script&gt;</code></pre>
+				</div>
+
+				<div class="col-sm-12">
+					<h4>Базовые функции</h4>
+					<summary>Как и RequireJs, VendorJs позволяет производить асинхронную загрузку js-файлов. Синтаксис функции vendor аналогичен функции require и её функционал позволяет загружать файл, импортируя модуль переданный в define.</summary>
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="filename">myscript1.js</div>
+							<pre><code class="javascript">define(function() { return function(mess) { alert(mess); }; });</code></pre>
+						</div>
+						<div class="col-sm-6">
+							<div class="filename">myscript2.js</div>
+							<pre><code class="javascript">define('Hello, Vendor!');</code></pre>
+						</div>
+					</div>
+					<div class="filename">main.js</div>
+					<pre><code class="javascript">vendor(['myscript1.js','myscript2.js'], function(module1,module2) {
+	module1(module2); // displays a greeting
+});</code></pre>
+					<summary>Ради удобства VendorJs инициализирует глобальные функции define и require. Хотя последним пользоваться не рекомендуется, т.к. именно функция vendor обладает полноценным функционалом и кроме того полностью аналогична require.</summary>
+					
+						
 				</div>
 				<div class="col-sm-6 centered">
 					<h4>Асинхронная загрузка стилей</h4>
-					<summary>Загрузка стилей происходит по тому же принципу, что и загрузка js-файлов.</summary>
-					<pre><code class="javascript">vendor.requirecss(['styles/primary.css','styles/secondary.css'], function() {
+					<summary>Загрузка стилей происходит по тому же принципу, что и загрузка js-файлов. Файлы css не возвращают модулей, поэтому в аргументы callback-функции будет передавать только булевое true. </summary>
+					<pre><code class="javascript">vendor(['scripts/main.js','styles/primary.css','styles/secondary.css'], function() {
 		// Стили загружены
-	});</code></pre>
+});</code></pre>
 					
 				</div>
-
 				<div class="col-sm-6 centered">
-					<h4>Асинхронная загрузка bower-компонентов</h4>
-					<summary>Каждый bower-компонент может быть загружен вместе со всеми скриптами, стилями и зависимостями по одному имени пакета.</summary>
-					<pre><code class="javascript">vendor.bower(['bootstrap'], function() {
-		// Помимо файлов bootstrap, будет так же подключен jQuery
-	});</code></pre>
+					<h4>Прелоудер изображений</h4>
+					<summary>Вы можете создавать предварительные загрузки изображений. Callback-функции будет получать в качестве аргументов, созданные объекты Image для каждого файла.</summary>
+					<pre><code class="javascript">vendor(['images/mypic1.jpg','images/mypic2.jpg'], function(pic1,pic2) {
+	console.log(pic1.width,pic2.width);
+});</code></pre>
+					
 				</div>
-				<div class="col-sm-6 centered">
-					<h4>Классика жанра: define(), require()</h4>
-					<summary>Вы можете использовать базовый функционал require и define как в RequireJs.</summary>
-					<pre><code class="javascript">require(['module/my.js'], function(my) { define('mod2',function() { return my.factory; }); });</code></pre>
-				</div>
-				<div class="col-sm-6 centered">
-					<h4>Перебор ресурсов</h4>
-					<summary>Возможность вызова callback для каждого загруженного файла с доступом к информации о прогрессе загрузки</summary>
+				<div class="col-sm-12 centered">
+					<h4>each() Перебор ресурсов</h4>
+					<summary>Порой бывает важно не только загрузить файлы, но и начать их обработку сразу же после загрузки каждого. Для этого объект vendor() имеет метод each(callback). Функция callback будет вызываться каждый раз, когда будет загружен один из файлов в списке.</summary>
 					<pre><code class="javascript">vendor(['module/my.js','images/image.png']).each(function(res) {
-		console.log('loading progress '+(100*this.progress)+'%');
-	});</code></pre>
+	console.log('Файл '+this.url+' загружен');
+});</code></pre>
+					<summary>Контекст, в котором вызывается функция содержит некоторую информацию о загруженном файле.</summary>
+					<pre><code class="javascript">vendor('images/mypic1.jpg').each(function(pic1) {
+	console.log('Прогресс загрузки', this.progress); // 1
+	console.log('Url', this.url); // http://yoursite/images/mypic1.jpg
+	console.log('Типа файла', this.type); // image
+	console.log('Время загрузки мс', this.uptime); // 201
+});</code></pre>
 				</div>
-				<div class="col-sm-6">
-					<h4>Единый интерфейс для всех поддерживаемых типов ресурсов</h4>
-					<summary>Весь функционал доступен через единую функцию vendor(). Т.е. вы можете не писать вызов методов require, requirecss, images, bower, что бы загрузить определенный тип файлов. Просто расскажите функции vendor, что вам нужно загрузить и она это сделает.</summary>
-					<pre><code class="javascript">vendor(['go.js','go.png','bower/jquery','go.css'], 
-		function(module, image, jquery) {
-			// Все файлы загружены!
-		}
-	);</code></pre>
-					<summary>Для загрузки bower-компонентов через функцию vendor необходимо указывать префикс bower/.</summary>
+
+				<div class="col-sm-12 centered">
+					<h4>Асинхронная загрузка bower-компонентов</h4>
+					<summary>Ещё одна приятная особенность VendorJs — работа с bower-компонентами. VendorJs позволяет загружать компоненты, полученные через Bower, анализируя файл bower.json. Существует два способа загрузки компонентов:</summary>
+
+					<div class="row">
+						<div class="col-md-6">
+							<summary><strong>Прямое указание на bower.json</strong></summary>
+							<pre><code class="javascript">vendor.bower(['bower_components/jquery/bower.json'], function($) {});</code></pre>
+							<summary>В этом случае местоположение компонента будет не важно, скрипт возмет все данные о компоненте из файла bower.json.</summary>
+							
+						</div>
+						<div class="col-md-6">
+							<summary><strong>Сокращенное указание на компонент</strong></summary>
+							<pre><code class="javascript">vendor.bower(['bower//jquery'], function($) {
+});</code></pre>
+							<summary>Использование специального префикса <code>bower//</code> (этот способ является рекомендуемым). В этом случае скрипт ищет компонент в директории bower_components корня сайта, если в корне сайта отсутствует файл .bowerrc. Если <a href="http://bower.io/docs/config/" target="_blank">.bowerrc<img src="images/bower.jpg" width="100%" class="hint" /></a> присутствует, то скрипт вначале анализирует его данные, получая сведения о местонахождении директории с компонентами bower.</summary>
+												
+						</div>
+					</div>
+					<summary>Существует альтернативный способ указания пути до директории с компонентами — в атрибутe тэга &lt;SCRIPT&gt; <code>[bower-components]</code></summary>
+					<pre><code>&lt;script src=&quot;vendor/vendor.js&quot; bower-components=&quot;app/vendors/&quot; &gt;&lt;/script&gt;</code></pre>
+					<summary>В нем можно указать абсолютный или относительный путь до директории с компонентами.</summary>
+					<h5>Принцип загрузки bower-компонентов</h5>
+					<summary>Когда мы подключаем компонент bower, скрипт анализирует файл bower.json на предмет зависимостей и файлов компонента. Т.е. если выполнить скрипт:</summary>
+					<pre><code class="javascript">vendor(['bower//bootstrap'], function() {
+});</code></pre>
+					<summary>То подключен будет не только bootstrap.js и bootstrap.css, но и jQuery. Так как jquery присутствует с списках зависимостей bootstrap (естественно для этого jquery уже должен быть установлен в директорию компонентов bower).</summary>
+					<summary>Как и в случае еденичного подключения, подключение компонента возвращает ссылку на модуль, если он присутствует в компоненте.</summary>
+					<pre><code class="javascript">vendor(['bower//jquery'], function(jQuery) {
+	jQuery('body').html("Hello, Vendor!");
+});</code></pre>
 				</div>
-				<div class="col-sm-6 centered">
-					<h4>Настройка глобальных переменных</h4>
-					<summary>После загрузки бибилиотеки можно в ручную указать параматеры путей baseUrl — "домашняя директория", bowerUrl — папка компонентов bower, paths - алиасы.</summary>
+				<div class="col-sm-12 centered">
+					<h4>Загрузка файла из текущего местоположения в define()</h4>
+					<summary>Всегда хочется иметь возможность в javascript загружать файл, который лежит в той же директории, что и исполняемый файл. К примеру у нас есть файл /inside/cat.js и файл /inside/mouse.js. Нам хотелось бы подключить из файла cat.js файл mouse.js. В классическом случае работы функции define для этого нужно указывать полный путь файла mouse.js от корневой директории приложения.</summary>
+					<pre><code class="javascript">define(['inside/mouse.js'], function(mouse) {});</code></pre>
+					<summary>Но нам не хотелось бы каждый раз прописывать весь путь, мы просто хотим подключить соседний файл. Для решения этой задачи в VendorJs реализована поддержка привязки локаций к модулям. И мы может просто указать соседний файл:</summary>
+					<pre><code class="javascript">define(['./mouse.js'], function(mouse) {});</code></pre>
+					<summary>Для того, что бы путь начал расчитывать от нашего текущего местоположения, необходимо вначале пути указать точку со слешем <code>./</code>. Этот префикс даст знать скрипту, что искать требуемый путь стоит искать в той же директории, в которой и находится файл, вызывавший эту функцию.</summary>
+					<summary>В виду особенностей интерпритатора Javascript, данная возможность может быть использована только в функции define() внутри модуля. А так же это недопустимо внутри остроченных участков кода. <a class="spy">Javascript - язык, гулящий во времени<div class="hint"><img src="images/bttf.jpg" /></div></a>: мы можем отложить выполнение участка кода функцией setTimeout или через XMLHttpRequest на неопределенный срок. Стоит это сделать - и мы теряем корни, т.е. следующая конструкция не сработает:</summary>
+					<pre><code class="javascript">setTimeout(function() { 
+	define(['./deeper/mouse.js'], function(mouse) {}); // Я не знаю где я и не уверен кто я
+}, 10);</code></pre>
+					<summary>Так как код выполнен асинхронно, что лишает нас информации о файле, в котором мы находимся. Но если следовать простому правилу, что супер-относительные пути поддерживаются лишь в define внутри модулей, вы спокойной сможете пользоваться это возможностью.</summary>
+				</div>
+				<div class="col-sm-12 centered">
+					<h4>Конфигурация</h4>
+					<summary>После загрузки библиотеки с помощью функции <code>vendor.config</code> можно в ручную указать параметры <code>baseUrl</code> — "домашняя директория", <code>bowerComponentsUrl</code> — папка компонентов bower и алиасы. И хотя алиасы в VendorJs проработаны не так хорошо как в RequireJS, всё же их можно использовать. Возможно, в будущем вопрос их использования, как и вопрос сборки проекта, будет продуман глубже.</summary>
 					<pre><code class="javascript">vendor.config({
 		baseUrl: 'scripts/',
-		bowerUrl: 'scripts/vendor/',
+		bowerComponentsUrl: 'scripts/vendor/',
 		paths: {
 			'mymods': 'scripts/mods/my/'
 		}
 	});</code></pre>
 					
 				</div>
-				<div class="col-sm-6 centered">
+				<div class="col-sm-12 centered">
 					<h4>Кроссбраузерность</h4>
-					<summary>На данный момент бибилиотека поддерживает все современные браузеры и IE8+.</summary>
+					<summary>На данный момент библиотека поддерживает все современные браузеры и IE8+.</summary>
+				</div>
+				<div class="col-sm-12 centered">
+					<h4>Лицензия</h4>
+					<summary>Vendor.js распространяется под лицензией MIT (<a href="" id="openli">Читать текст лицензии</a>)</summary>
+					<pre class="license" id="license"></pre>
+					<script>
+						document.getElementById('openli').addEventListener('click', function(e) {
+							vendor(['LICENSE.MD'], function(text) {
+								document.getElementById('license').innerText = text;
+							});
+							e.preventDefault();
+							return false;
+						});
+					</script>
+				</div>
+				<div class="col-md-12">
+					<h1>Помощь в разработке</h1>
+					<summary>У меня очень мало времени на разработку, поэтому я бы был благодарен за любую помощь в поисках ошибок и форках.</summary>
+					<summary>Сообщить об ошибке: <a href="https://github.com/morulus/vendor/issues">https://github.com/morulus/vendor/issues</a></summary>
+					<summary>Форкнуть: <a href="https://github.com/morulus/vendor">https://github.com/morulus/vendor</a></summary>
+					<summary>Тестирование: <a href="tests/">QUnit tests</a></summary>
 				</div>
 			</div>
 		</div>
 	</section>
 	<section>
 		<div class="container">
-				<article>Автор: <a href="http://github.com/morulus/" title="Vladimir Kalmykov (@morulus)" class="contact">@morulus<img src="images/morulus.png" /></a> Версия: <span class="version" id="version">1.4</span></article>
+				<article>Автор библиотеки VendorJs — <a href="http://github.com/morulus/" title="Vladimir Kalmykov (@morulus)" class="contact">@morulus<img class="hint" src="images/morulus.png" /></a>. Версия: <span class="version" id="version">1.4</span></article>
 		</div>
 	</section>
 	<a href="https://github.com/morulus/vendor/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>

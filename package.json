@@ -1,0 +1,21 @@
+{
+  "name": "vendorjsrelease",
+  "version": "1.0.0",
+  "description": "1.0.0",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/morulus/vendor/tree/gh-pages"
+  },
+  "keywords": [
+    "vendorjs"
+  ],
+  "author": "morulus",
+  "license": "MIT",
+  "devDependencies": {
+    "uglify-js":"latest"
+  }
+}

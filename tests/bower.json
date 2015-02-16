@@ -1,0 +1,21 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "homepage": "https://github.com/morulus/vendor",
+  "authors": [
+    "Morulus <vladimirmorulus@gmail.com>"
+  ],
+  "description": "Unit test vendorjs",
+  "main": "test.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "qunit"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "qunit": "latest"
+  }
+}

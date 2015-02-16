@@ -35,8 +35,8 @@ vendor('bower_components/jquery/dist/jquery.js', function($) {
 
 _You can use nesting:_
 ```javascript
-include('bower_components/jquery/dist/jquery.js', function() {
-  include('js/myscript.js', function(my) {
+vendor('bower_components/jquery/dist/jquery.js', function() {
+  vendor('js/myscript.js', function(my) {
 });
 });
 ```
@@ -53,7 +53,7 @@ Brilliant?
 ### Talk about bower components
 _Load bower package by the force_
 ```javascript
-vendor(['bower/bootstrap'], function() {
+vendor(['bower//bootstrap'], function() {
  // Bootstrap just ready
 });
 ```
@@ -71,10 +71,17 @@ define('mymodule', ['js/myscript.js'], function() {
 });
 ```
 
+### Relative paths in define
+```javascript
+define('magic', ['.myscript2.js'], function() {
+  return 'ok';
+});
+```
+
 ### Getting css files
 You can get CSS files as well as get Js-files with function vendor.requirecss(string || array) or vendor(string || array)
 ```javascript
-vendor.requirecss("css/main.css");
+vendor("css/main.css");
 ```
 
 ### baseUrl
@@ -101,13 +108,10 @@ vendor('jquery');
 ```
 
 ## Browsers supports
-Chrome,FF,Opera,Safari,webkit's browser in short, IE9+
+Chrome,FF,Opera,Safari,webkit's browser in short, IE8+
 
 ## Author
 Vladimir Morulus (https://github.com/morulus/)
-
-## Why reinvent the wheel??
-What different between Requirejs, for example? — you can say. Simple reasons — the existence of Coca-Cola exclude the existence of other drinks? Good day.
 
 ## P.S
 Sorry my english.
