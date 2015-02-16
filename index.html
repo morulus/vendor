@@ -12,6 +12,7 @@
 
 	
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/zenburn.min.css" />
+	<link rel="stylesheet" href="style/hightlight-style.css" />
 	
 	<script src="dist/vendor.js" baseurl="" no-bower></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
@@ -31,7 +32,7 @@
 					</summary>
 
 					<article class="downloads">
-						<a href="vendor.js">Скачать боевую версию</a> <a href="dist/vendor.js">Скачать дистрибутив [для отладки]</a> 
+						<a href="vendor.js" download>Скачать боевую версию</a> <a href="dist/vendor.js" download>Скачать дистрибутив</a> 
 					</article>
 					
 				</div>
@@ -90,13 +91,13 @@
 					<pre><code class="javascript">vendor(['module/my.js','images/image.png']).each(function(res) {
 	console.log('Файл '+this.url+' загружен');
 });</code></pre>
-					<summary>Контекст, в котором вызывается функция содержит некоторую информацию о загруженном файле.</summary>
+					<summary>Контекст, в котором вызывается функция содержит некоторую информацию о прогрессе загрузки.</summary>
 					<pre><code class="javascript">vendor('images/mypic1.jpg').each(function(pic1) {
-	console.log('Прогресс загрузки', this.progress); // 1
-	console.log('Url', this.url); // http://yoursite/images/mypic1.jpg
-	console.log('Типа файла', this.type); // image
-	console.log('Время загрузки мс', this.uptime); // 201
+	console.log('Прогресс загрузки', this.progress); // 0-1
 });</code></pre>
+<!--console.log('Url', this.url); // http://yoursite/images/mypic1.jpg
+	console.log('Типа файла', this.type); // image
+	console.log('Время загрузки мс', this.uptime); // 201-->
 				</div>
 
 				<div class="col-sm-12 centered">
@@ -148,12 +149,12 @@
 					<h4>Конфигурация</h4>
 					<summary>После загрузки библиотеки с помощью функции <code>vendor.config</code> можно в ручную указать параметры <code>baseUrl</code> — "домашняя директория", <code>bowerComponentsUrl</code> — папка компонентов bower и алиасы. И хотя алиасы в VendorJs проработаны не так хорошо как в RequireJS, всё же их можно использовать. Возможно, в будущем вопрос их использования, как и вопрос сборки проекта, будет продуман глубже.</summary>
 					<pre><code class="javascript">vendor.config({
-		baseUrl: 'scripts/',
-		bowerComponentsUrl: 'scripts/vendor/',
-		paths: {
-			'mymods': 'scripts/mods/my/'
-		}
-	});</code></pre>
+	baseUrl: 'scripts/',
+	bowerComponentsUrl: 'scripts/vendor/',
+	paths: {
+		'mymods': 'scripts/mods/my/'
+	}
+});</code></pre>
 					
 				</div>
 				<div class="col-sm-12 centered">

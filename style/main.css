@@ -5,7 +5,7 @@ body {
 	font-family:"Roboto";
 	font-size:23px;
 	font-weight: 200;
-	color:#ffa133;
+	color:#A3C0C0;
 	padding-top:50px;
 }
 
@@ -14,7 +14,7 @@ section {
 }
 
 a {
-	color:rgb(255, 116, 0);
+	color:rgb(150, 255, 239);
 	text-decoration:none;
 }
 
@@ -123,16 +123,18 @@ a.contact > img {
 
 article.downloads {
 		background-color:black;
-		padding:40px;
-		text-align:center;
+		padding:40px 0;
+		text-align:left;
 }
 
 article.downloads > a{
-	color: rgb(255, 116, 0);
-	font-size: 20px;
-	text-decoration: none;
-	display: inline-block;
-	padding: 0 10px;
+	padding: 6px 16px;
+	background-color: rgb(34, 66, 165);
+	min-width: 280px;
+	border-radius: 4px;
+	line-height: 32px;
+	margin: 0 0 6px 0;
+	color:white;
 }
 
 article.downloads > a:hover {
