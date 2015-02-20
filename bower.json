@@ -1,6 +1,6 @@
 {
   "name": "vendor",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "authors": [
     "Morulus <vladimirmorulus@gmail.com>"
   ],
@@ -12,7 +12,8 @@
     "*.html",
     "images",
     "style",
-    ".htaccess"
+    ".htaccess",
+    "build.js"
   ],
   "moduleType": [
     "globals"

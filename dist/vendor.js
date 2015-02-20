@@ -903,159 +903,175 @@
 
 	_w.bower = _w.vendor.bower = function(r, callback) {
 		if ("object"!==typeof r) r = [r];
+		
+		var run = function() {
+			new (function(paths, callback) {
 
-		new (function(paths, callback) {
+				this.paths = paths;
+				this.packages = [];
+				this.callback = callback;
+				this.loadings = 0;
 
-			this.paths = paths;
-			this.packages = [];
-			this.callback = callback;
-			this.loadings = 0;
-
-			this.execute = function() {
-				
-				for (var i = 0;i<this.paths.length;i++) {
-					if ("string"!==typeof this.paths[i]) {
-						// Throw error
-						throw "vendor.js: The path to bower component is not a string"; 
-						return false;
-					};
-					this.getBowerPackage(this.paths[i]);
-				}
-			}
-
-			this.getBowerPackage = function(path) {
-				var thisbower = this;
-				this.packages.push({
-					path: path,
-					module: null
-				});
-				var package = this.packages[this.packages.length-1];
-				this.loadings++;
-				/* Определяем тип запроса */
-				
-				if (path.substring(0,2)==='//')
-				var absloc = vendor.makeAbsPath(path.substring(2), vendor._config.bowerComponentsUrl);
-				else var absloc = vendor.makeAbsPath(path.substring(0,path.length-10));
-
-				new (function(absloc,bowerMng,callback) {
-					this.callback = callback;
-					this.loadings = 0;
-					this.absloc = absloc;
-					this.mainModule = null;
-					this.execute = function() {
-						var that = this;			
-						// Определяет директорию компонентов Bower
-						this.componentsLocation = (function(loca) { for(var i=0;i<=1;i++) loca = loca.substring(0,loca.lastIndexOf('/')); return loca+'/'; })(this.absloc);		
-						vendor.getJson(this.absloc+'bower.json', function(config) {
-							
-							if ("object"!==typeof config) {
-								throw "vendor.js: bower.json not found"; 
-								return false;
-							}
-							if ("undefined"===typeof config.main) {
-								throw "vendor.js: bower.json has no main key"; 
-								return false;
-							}
-
-							
-							/* Функция продолжит загружать пакет при условии что остальные зависимости загружены */
-							var cont = function() {
-								if ("string"===typeof config.main) config.main = [config.main];
-								var js=[],css=[];
-								for (var i=0;i<config.main.length;i++) {
-									// Js file
-									
-									var pure = (function(path) { var qp = path.lastIndexOf('?'); if (qp<0) qp = path.length; return path.substring(0,qp); })(config.main[i]);
-									
-									if (pure.substr(pure.length-3, 3).toLowerCase()=='.js') {
-
-										js.push(absloc + config.main[i]);
-									}
-									// Css file
-									if (pure.substr(pure.length-4, 4).toLowerCase()=='.css') {
-										css.push(absloc + config.main[i]);
-									}
-								}
-
-								if (js.length>0) {
-									that.loadings++;
-									
-									vendor.require(js, function() {
-										
-										
-										that.catchMainModule(arguments); // Подхватываем модуль, который вернем функции bower
-										that.loaded();
-										
-									});
-								}
-								if (css.length>0) {
-
-									that.loadings++;
-									vendor.requirecss(css, function() {
-										that.loaded();
-									});
-								}
-							}
-
-							/* Загружаем зависимости */
-							var deps = [];
-							if (config.dependencies) {
-								for (var prop in config.dependencies) {
-									if (config.dependencies.hasOwnProperty(prop)) {
-										/* Формируем правильный адрес зависимостей */
-										deps.push(that.componentsLocation+prop+'/bower.json');
-									}
-								}
-							}
-							if (deps.length>0) {
-								vendor.bower(deps, cont);
-							} else {
-								cont();
-							}
-							
-						});
-					};
-					this.loaded = function() {
-						this.loadings--;
-						if (this.loadings===0) {
-
-							this.callback(this.mainModule);
-						}
-					};
-					/* 
-					Функция получает список полученных модулей, но выбирает только первый из них, который не является NUll или undefindd, как основной
-					При полном завершеии загрузки Bower-компонента этот модуль будет возвращен в callback функцию
-					*/
-					this.catchMainModule = function(modules) {
-
-						if (!modules instanceof Array) return false;
-						for (var i=0;i<modules.length;i++) {
-							if (modules[i]!==null && "undefined"!==typeof modules[i]) {
-
-								this.mainModule = modules[i]; break;
-							}
-						}
+				this.execute = function() {
+					
+					for (var i = 0;i<this.paths.length;i++) {
+						if ("string"!==typeof this.paths[i]) {
+							// Throw error
+							throw "vendor.js: The path to bower component is not a string"; 
+							return false;
+						};
+						this.getBowerPackage(this.paths[i]);
 					}
-
-					this.execute();
-				})(absloc, this, function(module) {
-					package.module = module;
-
-					thisbower.loaded();
-				});
-			},
-			this.loaded = function() {
-				this.loadings--;
-				if (this.loadings===0) {
-					var callbackModules = [];
-					for (var i = 0;i<this.packages.length;i++) {
-						callbackModules.push(this.packages[i].module)
-					}
-					this.callback.apply(window, callbackModules);
 				}
-			}
-			this.execute();
-		})(r, callback || false);
+
+				this.getBowerPackage = function(path) {
+					var thisbower = this;
+					this.packages.push({
+						path: path,
+						module: null
+					});
+					var package = this.packages[this.packages.length-1];
+					this.loadings++;
+					/* Определяем тип запроса */
+					
+					if (path.substring(0,2)==='//')
+					var absloc = vendor.makeAbsPath(path.substring(2), vendor._config.bowerComponentsUrl);
+					else var absloc = vendor.makeAbsPath(path.substring(0,path.length-10));
+
+					new (function(absloc,bowerMng,callback) {
+						this.callback = callback;
+						this.loadings = 0;
+						this.absloc = absloc;
+						this.mainModule = null;
+						this.execute = function() {
+							var that = this;			
+							// Определяет директорию компонентов Bower
+							this.componentsLocation = (function(loca) { for(var i=0;i<=1;i++) loca = loca.substring(0,loca.lastIndexOf('/')); return loca+'/'; })(this.absloc);		
+							vendor.getJson(this.absloc+'bower.json', function(config) {
+								
+								if ("object"!==typeof config) {
+									throw "vendor.js: bower.json not found"; 
+									return false;
+								}
+								if ("undefined"===typeof config.main) {
+									throw "vendor.js: bower.json has no main key"; 
+									return false;
+								}
+
+								
+								/* Функция продолжит загружать пакет при условии что остальные зависимости загружены */
+								var cont = function() {
+									if ("string"===typeof config.main) config.main = [config.main];
+									var js=[],css=[];
+									for (var i=0;i<config.main.length;i++) {
+										// Js file
+										
+										var pure = (function(path) { var qp = path.lastIndexOf('?'); if (qp<0) qp = path.length; return path.substring(0,qp); })(config.main[i]);
+										
+										if (pure.substr(pure.length-3, 3).toLowerCase()=='.js') {
+
+											js.push(absloc + config.main[i]);
+										}
+										// Css file
+										if (pure.substr(pure.length-4, 4).toLowerCase()=='.css') {
+											css.push(absloc + config.main[i]);
+										}
+									}
+
+									if (js.length>0) {
+										that.loadings++;
+										
+										vendor.require(js, function() {
+											
+											
+											that.catchMainModule(arguments); // Подхватываем модуль, который вернем функции bower
+											that.loaded();
+											
+										});
+									}
+									if (css.length>0) {
+
+										that.loadings++;
+										vendor.requirecss(css, function() {
+											that.loaded();
+										});
+									}
+								}
+
+								/* Загружаем зависимости */
+								var deps = [];
+								if (config.dependencies) {
+									for (var prop in config.dependencies) {
+										if (config.dependencies.hasOwnProperty(prop)) {
+											/* Формируем правильный адрес зависимостей */
+											deps.push(that.componentsLocation+prop+'/bower.json');
+										}
+									}
+								}
+								if (deps.length>0) {
+									vendor.bower(deps, cont);
+								} else {
+									cont();
+								}
+								
+							});
+						};
+						this.loaded = function() {
+							this.loadings--;
+							if (this.loadings===0) {
+
+								this.callback(this.mainModule);
+							}
+						};
+						/* 
+						Функция получает список полученных модулей, но выбирает только первый из них, который не является NUll или undefindd, как основной
+						При полном завершеии загрузки Bower-компонента этот модуль будет возвращен в callback функцию
+						*/
+						this.catchMainModule = function(modules) {
+
+							if (!modules instanceof Array) return false;
+							for (var i=0;i<modules.length;i++) {
+								if (modules[i]!==null && "undefined"!==typeof modules[i]) {
+
+									this.mainModule = modules[i]; break;
+								}
+							}
+						}
+
+						this.execute();
+					})(absloc, this, function(module) {
+						package.module = module;
+
+						thisbower.loaded();
+					});
+				},
+				this.loaded = function() {
+					this.loadings--;
+					if (this.loadings===0) {
+						var callbackModules = [];
+						for (var i = 0;i<this.packages.length;i++) {
+							callbackModules.push(this.packages[i].module)
+						}
+						this.callback.apply(window, callbackModules);
+					}
+				}
+				this.execute();
+			})(r, callback || false);
+		}
+
+		/* Автоопределение расположения bower компонентов */
+		if (!vendor._config.noBowerrc) {
+			vendor.getJson(_w.location.origin+'/.bowerrc', function(data) {
+				if ("object"===typeof data && "string"===typeof data.directory) {
+					
+					vendor._config.bowerComponentsUrl = vendor.makeAbsPath(data.directory, _w.location.origin+'/');
+				}
+				run.call(this);
+			})
+		} else {
+			run.call(this);
+		}
+		
 	}
 
 	_w.vendor.images = function(imgs, callback) {
@@ -1166,6 +1182,7 @@
 						var h = i.split("vendor.js");
 						var baseUrl = (h[0].substr(0,5)=='http:') ? h[0] : (f + (h[0].substr(0,1)=='/' ? '' : '/') + h[0])+(h[0].substr(h[0].length-1, 1)==='/' ? '' : '');
 					}
+					if (baseUrl.substr(baseUrl.length-1, 1)!=='/') baseUrl=baseUrl+'/';
 					
 					_w.vendor.config({
 						baseUrl: baseUrl,
@@ -1188,11 +1205,5 @@
 		})()
 	};
 
-	/* Автоопределение расположения bower компонентов */
-	if (!vendor._config.noBowerrc) vendor.getJson(_w.location.origin+'/.bowerrc', function(data) {
-		if ("object"===typeof data && "string"===typeof data.directory) {
-			
-			vendor._config.bowerComponentsUrl = vendor.makeAbsPath(data.directory);
-		}
-	});
+	
 })(window);
