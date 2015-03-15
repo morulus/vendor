@@ -1190,7 +1190,7 @@
 						var h = g[j].attributes[bwk].value;
 						return (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)=='/' ? '' : '/') + h)+(h.substr(h.length-1, 1)==='/' ? '' : '');
 					})() : baseUrl+"bower_components/"),
-						noBowerrc: g[j].getAttribute('no-bowwerrc') ? true : false
+						noBowerrc: g[j].getAttribute('no-bowerrc') ? true : false
 					});
 					// import
 					vendor.selfLocationdefined = true;
