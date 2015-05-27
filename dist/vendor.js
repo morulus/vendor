@@ -1153,7 +1153,9 @@
 					
 					// Search for baseUrl					
 					for (var z=0;z<g[j].attributes.length;z++) {
+
 						if (g[j].attributes[z].name.toLowerCase()==='baseurl') {
+
 							bsk = z;
 							break;
 						};
@@ -1171,13 +1173,14 @@
 					f = f.join("/");
 					if (f.substr(-1)=='/') f = f.substr(0,-1);
 
-					if (bsk) {
+					if (bsk!==false) {
 						
 						var h = g[j].attributes[bsk].value;
 						var baseUrl = (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)=='/' ? '' : '/') + h);
+						
 					}
 					else {
-
+						
 						var i = g[j].attributes[srci].value.toLowerCase();
 						var h = i.split("vendor.js");
 						var baseUrl = (h[0].substr(0,5)=='http:') ? h[0] : (f + (h[0].substr(0,1)=='/' ? '' : '/') + h[0])+(h[0].substr(h[0].length-1, 1)==='/' ? '' : '');
@@ -1186,7 +1189,7 @@
 					
 					_w.vendor.config({
 						baseUrl: baseUrl,
-						bowerComponentsUrl: ((bwk) ? (function() {
+						bowerComponentsUrl: ((bwk!==false) ? (function() {
 						var h = g[j].attributes[bwk].value;
 						return (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)=='/' ? '' : '/') + h)+(h.substr(h.length-1, 1)==='/' ? '' : '');
 					})() : baseUrl+"bower_components/"),
