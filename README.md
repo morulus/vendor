@@ -119,7 +119,7 @@ Vladimir Morulus (https://github.com/morulus/)
 
 ## Updates
 
-### 1.1
+### 1.3
 - Fixed problems with re-loading the script and relative paths 
 - Adds debug and watch functions
 
