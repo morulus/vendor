@@ -96,15 +96,19 @@ This script will get file `mynewfolder/scripts/foo.js'
 vendor('foo');
 ```
 
-### Aliases
-You can set aliases with config.paths like in Require.js.
+### Debug
+Debugging works with two functions: debug() and watch()
+
+#### debug()
+Use vendor.debug function to see reports in console
 ```
-vendor.config({
-    paths: {
-        'jquery': 'vendor/jquery/dist/jquery'
-    }
-});
-vendor('jquery');
+vendor.debug(['./load/my/file.js'], function() {});
+```
+
+#### watch(filename) 
+Use vendor.watch to watch reports only for [filename]
+```
+vendor.watch('file.js', ['./load/my/file.js'], function() {});
 ```
 
 ## Browsers supports
@@ -113,7 +117,7 @@ Chrome,FF,Opera,Safari,webkit's browser in short, IE8+
 ## Author
 Vladimir Morulus (https://github.com/morulus/)
 
-## UPDATES
+## Updates
 
 ### 1.1
 - Fixed problems with re-loading the script and relative paths 
