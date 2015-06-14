@@ -113,5 +113,11 @@ Chrome,FF,Opera,Safari,webkit's browser in short, IE8+
 ## Author
 Vladimir Morulus (https://github.com/morulus/)
 
+## UPDATES
+
+### 1.1
+- Fixed problems with re-loading the script and relative paths 
+- Adds debug and watch functions
+
 ## P.S
 Sorry my english.

@@ -1,9 +1,36 @@
 /* 
-@ Vendor 1.2.
+@ Vendor 1.3
 @ author: Vladimir Morulus
 @ license: MIT 
 */
 (function(_w) {
+	'use strict';
+	var httpmin_expr = /^([a-z]*):\/\/([^\?]*)$/i;
+	var normalize = function(url) {
+		var protocol,domain;
+		url=url.split('\\').join('/');
+		if (httpmin_expr.test(url)) {
+			var protdom = httpmin_expr.exec(url);
+			protocol=protdom[1];
+			domain=protdom[2];
+		} else {
+			protocol='http://';
+			domain=url;
+		}
+
+		var urlp = domain.split('/');
+		
+		var res = [];
+		for (var i = 0;i<urlp.length;++i) {
+			if (urlp[i]==='') continue;
+			if (urlp[i]==='.') continue;
+			if (urlp[i]==='..') { res.pop(); continue; }
+			res.push(urlp[i]);
+		}
+
+		return protocol+'://'+res.join('/');
+	};
+
 	// Несколько приватных данных
 	var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
 	var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
@@ -26,28 +53,36 @@
 	
 	_w.vendor = function(userresources, callback) {
 		
-		if (this.constructor==Object) var config = this; else var config = {};
+		if ("object"===typeof this && this.constructor==Object) {
+			var config = this; 
+
+		} else var config = {};
 		
 		var progressor = new (function(userresources, callback, config) {
+
 			this.config = {
-				ownerLocation: false
+				ownerLocation: false,
+				ownerScriptName: 'root'
 			};
+
 			for (var i in config) {
 				if (config.hasOwnProperty(i)) this.config[i] = config[i];
 			}
+
 			this.userresources = userresources;
 			this.callback = callback;
 			this.loadings = 0;
 			this.queue = [];
 			this.execute = function() {
-
 				if ("string"===typeof this.userresources) this.userresources = [userresources];
 				this.max=this.loadings=this.userresources.length;
 				for (var i = 0;i<this.userresources.length;i++) {
+
 					this.determine(this.userresources[i]);
 				}
 			};
 			this.loaded = function(module) {
+				
 				this.loadings--;
 				this.progress = 1-(this.loadings/this.max);
 				if (this.eachCallback) this.eachCallback.call(this, module);
@@ -58,11 +93,14 @@
 			}
 			this.determine = function(path) {
 
+				
+
 				/* Проверяем наличие точки вначале пути, это будет сведетельствовать о том, что это относительный путь. В случае, если файл исполняется из другого модуля мы сможем загрузить файл по относительному пути */
 				if (path.substring(0,2)==='./') {
+
 					var rawpath = path;
-					
 					/* Проверяет преднастройки данного объекта, если относительный путь был взыван в define, то define должен был передать местоположение модуля, который вызвал define */
+					
 					if (this.config.ownerLocation) {
 						var path = this.config.ownerLocation+rawpath.substring(2, rawpath.length);
 					} 
@@ -74,6 +112,8 @@
 
 				var q = this.queue.length-1;
 				var pure = (function(path) { var qp = path.lastIndexOf('?'); if (qp<0) qp = path.length; return path.substring(0,qp); })(path);
+
+
 
 				// Js file
 				if (pure.substr(pure.length-3, 3).toLowerCase()=='.js') {
@@ -154,15 +194,57 @@
 		return progressor;
 	};
 	/* Готовит преднастройки перед вызовом vendor */
-	_w.vendor.take = function(config) {
-		function configurator(config) {
-			this.config = config;
-			this.get = function() {
+	_w.vendor.optional = function(config) {
+		var config = arguments[0];
+		var args = Array.prototype.slice.call(arguments);
 
-				return vendor.apply(this.config,arguments);
-			}
-		};
-		return new configurator(config);
+		args.shift();
+		
+		return vendor.apply(config,args);
+	}
+	_w.vendor.debug = function() {
+		this._config.debugMode = true;
+
+		return vendor.apply(this.config,arguments);
+		return this;
+	}
+	_w.vendor.watch = function() {
+		this._config.debugMode = true;
+		this._config.watchMode = true;
+		this._config.watchResource = arguments[0] instanceof Array ? arguments[0] : [arguments[0]];
+
+		var args = Array.prototype.slice.call(arguments, 1);
+
+		return vendor.apply(this.config,args);
+		return this;
+	}
+	_w.vendor.watchin = function(src) {
+		if (this._config.watchMode==false) return true;
+		if ("string"!==typeof src) return false;
+		for (var i = 0;i<this._config.watchResource.length;++i) {
+			if (src.indexOf(this._config.watchResource[i])>-1) return true;
+		}
+		return false;
+	}
+	_w.vendor.debuglog = function() {
+		if (!this._config.debugMode||"function"!==typeof console.log) return false;
+		var args = Array.prototype.slice.call(arguments, 1);
+		args.unshift('color:green;font-weight:bold');
+		args.unshift('%c'+arguments[0]+':');
+		console.log.apply(console, args);
+	}
+	_w.vendor.debugGroup = function(name) {
+		console.group(name);
+	}
+	_w.vendor.debugGroupEnd = function(name) {
+		console.groupEnd(name);
+	}
+	_w.vendor.alert = function() {
+		if (!this._config.debugMode||"function"!==typeof console.log) return false;
+		var args = Array.prototype.slice.apply(arguments);
+		args.unshift('color:red;font-weight:bold');
+		args.unshift('%cImportant:');
+		console.log.apply(console, args);
 	}
 	_w.vendor.constants = {
 		imagesRegExpr: /\.[jpg|jpeg|gif|png|bmp]*$/i
@@ -260,10 +342,6 @@
 
 					var g = this.src[i];
 
-					/* Преопределяем fabric для данного ресурс. Это нужно для того, что бы ... */
-					this.fabrics.push(g);
-					var s = this.src[i];
-
 					// [upload_module] >>
 					/* 
 						Это фунционал вынесен в отдельну функция для поддержка относительного позиционаирования подключаемого модуля 
@@ -273,13 +351,25 @@
 						var f = f;
 						/* Добавляем расширение .js если оно отсутствует */
 						var k = f.substr(f.length - 3, 3) != ".js" ? f + ".js" : f;
+						/* Нормализуем url */
+						var normalsrc = normalize((!/^http/.test(k) ? _w.vendor._config.baseUrl : "") + k + (function(l) {
+							if (l != "") {
+								return "?" + l
+							}
+							return ""
+						})(_w.vendor._config.urlArgs));
+
+						if (vendor.watchin(normalsrc)) vendor.debuglog('Require', normalsrc);
+
+						/* Преопределяем fabric для данного ресурс. Это нужно для того, что бы ... */
+						h.fabrics.push(normalsrc);
 
 						/* Если данный адрес уже был загружен, то пропускаем этам загрузки и сразу сообщаем, что компонент загружен */
 						try {
 
-							if (_w.vendor._defined.indexOf(f) > -1) {
+							if (_w.vendor._defined.indexOf(normalsrc) > -1) {
 
-								h.loaded(k);
+								h.loaded(normalsrc);
 								return false;
 							} else {
 
@@ -294,10 +384,12 @@
 						
 
 						/* Проверяем надичие элемента в списке vendor.define.modules. Ведь запрашиваемвый элемент мог быть просто предопределен через vendor.define. */
-						if ('undefined' != typeof _w.vendor.define._modules[g]) {
-							h.loaded(k);
+						
+						if ('undefined' !== typeof _w.vendor.define._modules[normalsrc]) {
+							if (vendor.watchin(normalsrc)) vendor.debuglog("Download interrupted, the module already exists", normalsrc);
+							h.loaded(normalsrc);
 							return false;
-						};
+						}
 						
 						/* --- Continue: элемент был найден в списках vendor.define. 				*/
 						/* ---------------------------------------------------------------- */
@@ -305,22 +397,22 @@
 
 						/* Поскольку один и тот же ресурс может быть запрошен в разных ветках, мы должны его проверить на присутствие в специальных списках vendor._detained, куда мы определяем элементы, которые на данный момент уже проходят загрузку */
 						
-						if (vendor._detained.indexOf(f)>-1) {
-							
+						if (vendor._detained.indexOf(normalsrc)>-1) {
+							if (vendor.watchin(normalsrc)) vendor.debuglog('Download canceled because it is already in progress', normalsrc);
 							/* Если ресурс уже подгружается в параллельных ветках, то мы начинаем слушать завершения его подгрузки*/
-							vendor._onRedetain(f, function() {
+							vendor._onRedetain(normalsrc, function() {
 								/* Если ресурс не попал в define списки, т.е. он не поддерживает архитектуру AMD, тогда мы его просто закидываем в список загруженных модулей.
 								Здесь g - это пользовательское имя ресурса, f - это полное имя ресурса, в том виде в каком он присутствует в _config.paths, k  - это реальный путь до файла */
-								if ("undefined" == typeof _w.vendor.define._modules[g])
-								if (_w.vendor._defined.indexOf(f)<0) _w.vendor._defined.push(f);
+								if ("undefined" == typeof _w.vendor.define._modules[normalsrc])
+								if (_w.vendor._defined.indexOf(normalsrc)<0) _w.vendor._defined.push(normalsrc);
 								/* Учитывая, что загрузка свершилась, мы вызываем loaded() */	
-								h.loaded(k, g)
+								h.loaded(normalsrc)
 							});
 							return false;
 						} else {
 
 							/* Если ресурс запрошен впервые, мы его определяем в список detained, что бы параллельные ветки загрузок могли знать, что ресурс уже загружается */
-							vendor._detained.push(f); 
+							vendor._detained.push(normalsrc); 
 
 							/* Согласно вопросу совместимости с синхронными загрузками, нам нужно произвести тест на подгрузку данного ресурса нативно. Нативная подгрузка лишает нас возможности использовать AMD интерфейс, но дает возможность работы с сайтами, на которых нативная подгрузка уже не отъемлена. 
 							Мы тестируем страницу на присутствие тэга SCRIPT с подгружаемым адресом.
@@ -371,11 +463,10 @@
 
 								/* Итак мы дошли до данного кода, так как элемент загружается впервые или он загружен (загружается) нативно. Это значит, что нам нужно определить загружен ли он. */
 								(function(s, j) {
-					              var s = s;
 
 					              /* Определяем функцию, которая так или иначе будет выполнена при загрузке ресурса */
 					              var lse = function(interactive) {
-					              	
+					              	if (vendor.watchin(normalsrc)) vendor.debuglog('Loaded ', j.src);
 					              	if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" || interactive) {
 					              		
 					              		vendor.trigger('moduleLoaded', [j]);
@@ -389,29 +480,30 @@
 						              		 /* Если ресурс не определен в vendor.define._modules, нам нужно проследить, были вызвана функция vendor.define. 
 							                Фабрики фиксируются в переменной _last модуля vendor.define. Здесь мы выполняем данную функцию и получаем переменную, которую вернула fabric компонента. 
 							                В типичном случае присвоение знаения vendor.define._modules происходит в самой функции define, однако программист может вызвать define без указания имени компонента, тогда фабрика будет присваиваться последнему вызванному ресурсу. */             
-							                if ("undefined" == typeof _w.vendor.define._modules[s]) {
+							                if ("undefined" == typeof _w.vendor.define._modules[normalsrc]) {
 							                	
-								                _w.vendor.define._modules[s] = {
+								                _w.vendor.define._modules[normalsrc] = {
 								                  fabric: defi || null
 								                };  
 							            	};
 						              		/* Если ресурс присутствует в списках _detained, мы должна сообщить глобально о том, что он загружен */
-						                	if (vendor._detained.indexOf(f)>-1) vendor.releaseDetained(f);
+
+						                	if (vendor._detained.indexOf(normalsrc)>-1) vendor.releaseDetained(normalsrc);
 						                	 /* Определяем ресурс как загруженный, более для него не будет производиться никаких действий при следующем вызове. */
-							                if (_w.vendor._defined.indexOf(f)<0) 
+							                if (_w.vendor._defined.indexOf(normalsrc)<0) 
 							                {				                  
-							                  	_w.vendor._defined.push(f);
+							                  	_w.vendor._defined.push(normalsrc);
 							                };
 							                /* Сообщаем ветке о том, что ресурс был загружен */
 
-							                h.loaded(k, g)
+							                h.loaded(normalsrc)
 						              	};
+
 
 						              	/* проверяем last на наличие функции */
 						              	if ("function"===typeof _w.vendor.define._last) {
-						              		
 						              		/* Если last - функция, мы должны выполнить её передав callback код завершения загрузки данного модуля */
-
+						              		
 						              		_w.vendor.define._last(ok, j);
 
 						              		/* 
@@ -421,6 +513,7 @@
 						              		*/
 
 						              	} else {
+
 						              		ok();
 						              	};
 						              	/* Чистим память */
@@ -471,10 +564,10 @@
 
 					              			},50);
 					              			// Подчищаем хвосты
-					              			
 					       			 		
 					       			 		j.onload = j.onreadystatechange = function() {
 					       			 			if (j.readyState==='loaded'||j.readyState==='complete') {
+
 					       			 				lse();
 					       			 			}
 					       			 		}
@@ -535,19 +628,18 @@
 							              
 						            	})(window, lse);
 					       			};
-					        })(s, j); // s - пользовательское имя скрипта, j - ссылка на элемент SCRIPT
+					        })(normalsrc, j); // normalsrc - пользовательское имя скрипта, j - ссылка на элемент SCRIPT
 							
 							/* Если мы дошли до этой части скрипта, значит мы создали асинхронный SCRIPT и теперь должны инициализировать загрузку ресурса */
 						
 					        if (asynch) {
 					        	
-								j.src = (!/^http/.test(k) ? _w.vendor._config.baseUrl : "") + k + (function(l) {
-									if (l != "") {
-										return "?" + l
-									}
-									return ""
-								})(_w.vendor._config.urlArgs);
+					        	//vendor.debuglog('Async loading resouce', src);
+
+								j.src = normalsrc;
+								
 								/* Лишь после присвоения src мы вставляем скрипт на страницу */
+								
 								(function() {
 					              return document.documentElement || document.getElementsByTagName("HEAD")[0];
 					            })().appendChild(j);
@@ -559,6 +651,7 @@
 					
 					/* Устанавливаем реальный адрес исходя из предустановок _config.paths */
 					var f = (typeof _w.vendor._config.paths[this.src[i]] == "string") ? _w.vendor._config.paths[this.src[i]] : this.src[i];
+					
 					upload_module(f);
 					
 					
@@ -569,7 +662,7 @@
 			this.loaded = function(j, f) {
 
 				if (this.stop) {
-					return
+					return;
 				}
 				this.loads--;
 				
@@ -640,8 +733,11 @@
 		baseUrl: "",
 		urlArgs: "",
 		bowerComponentsUrl: _w.location.origin+"/bower_components/",
-		noBowerrc: false, // Не читать файл .bowerrc в корне сайта
-		paths: {}
+		noBowerrc: true, // Не читать файл .bowerrc в корне сайта
+		paths: {},
+		debugMode: false,
+		watchMode: false,
+		watchResource: []
 	};
 
 	_w.vendor.brahmaInside = true;
@@ -684,6 +780,8 @@
 		var depends = e || null;
 		var fabric = b || null;
 
+		if (vendor.watchin()) vendor.debuglog('Define', name, depends, fabric);
+
 		// После того как include выполняет модуль переменная initialed принимает значение true
 		// Если этого не происходит, то черещ 0,010 секунду выполнение модуля происходит автоматически
 		// (см. #autoexecute)
@@ -724,29 +822,36 @@
 			var execute = function(callback, script) {
 				
 				_w.vendor.define._last = null;
-				var callback = callback;
+				var src,scriptName;
 				
 				// Вычисляем url модуля
 				if ("object"===typeof script) {
-					var src = script.src;
-					(src.lastIndexOf('/')>-1) && (src = src.substring(0,src.lastIndexOf('/')+1));
+					(script.src.lastIndexOf('/')>-1) ? 
+					(src = script.src.substring(0,script.src.lastIndexOf('/')+1),
+					scriptName = script.src.substring(script.src.lastIndexOf('/')+1)) : 
+					(src=script.src,scriptName=script.src);
 				} else {
-
-					var src = vendor._config.baseUrl;
+					scriptName = 'root';
+					src = vendor._config.baseUrl;
 				}
 				
-				vendor.take({
-					ownerLocation: src // Директория в которой лежит файл, взывавший define
-				}).get(depends, function() {
-					
+				if (vendor.watchin(scriptName)) vendor.debugGroup(scriptName+':');
+				if (vendor.watchin(scriptName)) vendor.debuglog('Define', depends);
+				vendor.optional({
+					ownerLocation: src, // Директория в которой лежит файл, взывавший define
+					ownerScriptName: scriptName
+				}, depends, function() {
+					if (vendor.watchin(scriptName)) vendor.debuglog('Complete ', arguments);
+					if (vendor.watchin(scriptName)) vendor.debugGroupEnd(scriptName+':');
+
 					// Передаем в callback продукт фабрики
 					callback(initial.apply(window, arguments));
 				});
 			};
 
 		} else {
-
-			var execute = function(callback) {
+			
+			var execute = function(callback, script) {
 				_w.vendor.define._last = null;
 				callback(initial.apply(window, arguments));
 			}
@@ -758,7 +863,7 @@
 		/* Если обработка define идет в режтме interactive мы не должны присваивать _last, а необходимо найти скрипт, который в состоянии interactive */
 		if (vendor.state.interactive) {
 			vendor.getInteractiveScript(execute);
-		} else{
+		} else {
 			_w.vendor.define._last = execute;
 		}
 		
@@ -768,11 +873,18 @@
 		// Мы должны выполнить модуль сами, если это не сделал функционал include, сразу после вызова define
 		// Исключением является случай когда у нас отсутствуют зависимости и указано имя, в таком случае мы можем инициализировать модуль моментально
 		if (depends===null && name!==null) {
-			execute(function(){});
+			
+			//execute(function(){});
 		} else {
-			setTimeout(function() {
-				if (!initialed) execute(function(){});
-			}, 10);
+			/*
+			Этот код не верно рабоатет когда вызвается файл, содержащий Define в зависимостями
+			*/
+			/*setTimeout(function() {
+				if (!initialed) {
+					console.log('Calling execure', 804);
+					execute(function(){});
+				}
+			}, 10);*/
 		};
 	}
 
@@ -908,7 +1020,7 @@
 			new (function(paths, callback) {
 
 				this.paths = paths;
-				this.packages = [];
+				this.bpackages = [];
 				this.callback = callback;
 				this.loadings = 0;
 
@@ -926,11 +1038,11 @@
 
 				this.getBowerPackage = function(path) {
 					var thisbower = this;
-					this.packages.push({
+					this.bpackages.push({
 						path: path,
 						module: null
 					});
-					var package = this.packages[this.packages.length-1];
+					var bpackage = this.bpackages[this.bpackages.length-1];
 					this.loadings++;
 					/* Определяем тип запроса */
 					
@@ -1040,7 +1152,7 @@
 
 						this.execute();
 					})(absloc, this, function(module) {
-						package.module = module;
+						bpackage.module = module;
 
 						thisbower.loaded();
 					});
@@ -1049,8 +1161,8 @@
 					this.loadings--;
 					if (this.loadings===0) {
 						var callbackModules = [];
-						for (var i = 0;i<this.packages.length;i++) {
-							callbackModules.push(this.packages[i].module)
+						for (var i = 0;i<this.bpackages.length;i++) {
+							callbackModules.push(this.bpackages[i].module)
 						}
 						this.callback.apply(window, callbackModules);
 					}
@@ -1168,15 +1280,20 @@
 						};
 					}
 					// Parse location
-					var f = document.location.href.split("/");
-					f.pop();
-					f = f.join("/");
+					var f = document.location.href;
+					if (f.lastIndexOf('/')>7) f = f.substring(0, f.lastIndexOf('/'));
+					
 					if (f.substr(-1)=='/') f = f.substr(0,-1);
 
 					if (bsk!==false) {
 						
 						var h = g[j].attributes[bsk].value;
-						var baseUrl = (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)=='/' ? '' : '/') + h);
+						
+						if (h.substr(0,1)==='/') {
+							var match = f.match(/^(http?[s]?:\/\/[^\/]*)/);
+							if (match!==null) f = match[1];
+						}
+						var baseUrl = (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)==='/' ? '' : '/') + h);
 						
 					}
 					else {
@@ -1184,6 +1301,7 @@
 						var i = g[j].attributes[srci].value.toLowerCase();
 						var h = i.split("vendor.js");
 						var baseUrl = (h[0].substr(0,5)=='http:') ? h[0] : (f + (h[0].substr(0,1)=='/' ? '' : '/') + h[0])+(h[0].substr(h[0].length-1, 1)==='/' ? '' : '');
+							
 					}
 					if (baseUrl.substr(baseUrl.length-1, 1)!=='/') baseUrl=baseUrl+'/';
 					
