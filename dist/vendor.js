@@ -234,9 +234,11 @@
 		console.log.apply(console, args);
 	}
 	_w.vendor.debugGroup = function(name) {
+		if (!this._config.debugMode||"function"!==typeof console.group) return false;
 		console.group(name);
 	}
 	_w.vendor.debugGroupEnd = function(name) {
+		if (!this._config.debugMode||"function"!==typeof console.groupEnd) return false;
 		console.groupEnd(name);
 	}
 	_w.vendor.alert = function() {
