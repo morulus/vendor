@@ -1,0 +1,1 @@
+module.exports = /\.(jpg|jpeg|gif|png|bmp)*$/i;

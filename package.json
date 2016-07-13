@@ -1,0 +1,25 @@
+{
+  "name": "vendorjs",
+  "version": "1.3.0",
+  "description": "AMD library",
+  "main": "./lib/vendor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/morulus/vendor.git"
+  },
+  "keywords": [
+    "amd"
+  ],
+  "author": "Vladimir Kalmykov <vladimirmorulus@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/morulus/vendor/issues"
+  },
+  "homepage": "https://github.com/morulus/vendor#readme",
+  "devDependencies": {
+    "webpack": "^1.13.1"
+  }
+}

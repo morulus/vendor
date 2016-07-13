@@ -1,10 +1,10 @@
 {
   "name": "vendor",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "authors": [
     "Morulus <vladimirmorulus@gmail.com>"
   ],
-  "description": "Another way to use AMD at front",
+  "description": "Another way to use AMD",
   "main": "vendor.js",
   "ignore": [
     "*.MD",
