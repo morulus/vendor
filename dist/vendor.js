@@ -1,7 +1,7 @@
 /*!
  * The MIT License (MIT)
  * 
- * Copyright (c) 2014 Vladimir Kalmykov
+ * Copyright (c) 2014-2016 Vladimir Kalmykov
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -881,6 +881,7 @@
 	Создает новый анонимный модуль
 	*/
 	Vendor.anonymModule = function(name, resources, callback, config) {
+
 		
 		/*
 		У нас выходит так, что любая загрузка начинается с анонимного модуля,
@@ -1019,6 +1020,9 @@
 		makeStack: false // Make stack error on each request (for debug)
 	});
 
+
+	Vendor.loaders = {};
+
 	/*
 	Эта функция принимает только абсолютный путь или он будет преобразован в абсолютный самым примитивным образом
 	*/
@@ -1076,8 +1080,7 @@
 		return {
 			url: url,
 			dirname: dirname(url),
-			domain: domain(url),
-			type: resourceTypeMap[determineResourceType(url)]
+			domain: domain(url)
 		}
 	}
 

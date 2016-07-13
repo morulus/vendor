@@ -35,6 +35,7 @@ Vendor.addAlias = function(name, path) {
 Создает новый анонимный модуль
 */
 Vendor.anonymModule = function(name, resources, callback, config) {
+
 	
 	/*
 	У нас выходит так, что любая загрузка начинается с анонимного модуля,
@@ -173,6 +174,9 @@ Vendor.config({
 	makeStack: false // Make stack error on each request (for debug)
 });
 
+
+Vendor.loaders = {};
+
 /*
 Эта функция принимает только абсолютный путь или он будет преобразован в абсолютный самым примитивным образом
 */
@@ -230,8 +234,7 @@ Vendor.info = function(src, callback) {
 	return {
 		url: url,
 		dirname: dirname(url),
-		domain: domain(url),
-		type: resourceTypeMap[determineResourceType(url)]
+		domain: domain(url)
 	}
 }
 
