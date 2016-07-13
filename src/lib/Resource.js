@@ -5,6 +5,9 @@ var cssLoader = require('./loaderCss.js');
 var fileLoader = require('./loaderRaw.js');
 var imagesLoader = require('./loaderImage.js');
 var jsonLoader = require('./loaderJson.js');
+var events = require('./eventsMixin.js');
+var dirname = require('./dirname.js');
+var charge = require('./charge.js');
 
 /*
 Абстрактный скрипт

@@ -4,15 +4,21 @@ var domain = require('./domain.js');
 var mixin = require('./mixin.js');
 var Resource = require('./Resource.js');
 var Module = require('./Module.js');
+var normalize = require('./normalize.js');
+var dirname = require('./dirname.js');
 
 /*
 Основная функция vendor
 */
 var Vendor = function(resources, callback) {
-	/*
-	Создаем имитацию ресурса
-	*/
-	Vendor.anonymModule(false, resources, callback);
+	
+	if ("function"!==typeof callback) {
+		// CommonJs like request
+		throw new Error('VendorJs do not supports CommonJs style for require() function. In AMD style the function require() must have callback function at second argument. Use Browserify or Webpack compiler to build AMD bundle.');
+	} else {
+		// Amd request
+		Vendor.anonymModule(false, resources, callback);
+	}
 }
 
 Vendor.Module = Module;

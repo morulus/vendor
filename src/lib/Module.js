@@ -1,5 +1,6 @@
 var charge = require('./charge.js');
 var Resource = require('./Resource.js');
+var events = require('./eventsMixin.js');
 
 	/*
 	Модуль. Состоит из лчиного имени, списка зависимостей и скрипта владельца.

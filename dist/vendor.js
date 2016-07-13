@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-define(function() { return /******/ (function(modules) { // webpackBootstrap
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -80,7 +80,7 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 	var Vendor = __webpack_require__(15);
 	var Define = __webpack_require__(24);
 	var commonJsModule = __webpack_require__(25);
-	var Module = __webpack_require__(22);
+	var Module = __webpack_require__(23);
 	var Resource = __webpack_require__(16);
 
 
@@ -310,7 +310,7 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = function(url) {
 	    url=url.split('\\').join('/');
-	    if (domain_expr.test(url)) {
+	    if (regExprDomain.test(url)) {
 	    	var protodomen = regExprDomain.exec(url);
 	        return protodomen[1]+'://'+protodomen[2]+'/';
 	    } else {
@@ -849,16 +849,22 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 	var domain = __webpack_require__(5);
 	var mixin = __webpack_require__(10);
 	var Resource = __webpack_require__(16);
-	var Module = __webpack_require__(22);
+	var Module = __webpack_require__(23);
+	var normalize = __webpack_require__(11);
+	var dirname = __webpack_require__(4);
 
 	/*
 	Основная функция vendor
 	*/
 	var Vendor = function(resources, callback) {
-		/*
-		Создаем имитацию ресурса
-		*/
-		Vendor.anonymModule(false, resources, callback);
+		
+		if ("function"!==typeof callback) {
+			// CommonJs like request
+			throw new Error('VendorJs do not supports CommonJs style for require() function. In AMD style the function require() must have callback function at second argument. Use Browserify or Webpack compiler to build AMD bundle.');
+		} else {
+			// Amd request
+			Vendor.anonymModule(false, resources, callback);
+		}
 	}
 
 	Vendor.Module = Module;
@@ -1123,6 +1129,9 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 	var fileLoader = __webpack_require__(19);
 	var imagesLoader = __webpack_require__(20);
 	var jsonLoader = __webpack_require__(21);
+	var events = __webpack_require__(7);
+	var dirname = __webpack_require__(4);
+	var charge = __webpack_require__(22);
 
 	/*
 	Абстрактный скрипт
@@ -1687,10 +1696,27 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 22 */
+/***/ function(module, exports) {
+
+	module.exports = function(object, proto) {
+		for (var prop in proto) {
+			if (proto.hasOwnProperty(prop)) {
+				if ("object"===typeof proto[prop]) {
+					object[prop] = new Object(proto[prop]);
+				} else {
+					object[prop] = proto[prop];
+				}
+			}
+		}
+	};
+
+/***/ },
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var charge = __webpack_require__(23);
+	var charge = __webpack_require__(22);
 	var Resource = __webpack_require__(16);
+	var events = __webpack_require__(7);
 
 		/*
 		Модуль. Состоит из лчиного имени, списка зависимостей и скрипта владельца.
@@ -1953,22 +1979,6 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 		module.exports = Module;
 
 /***/ },
-/* 23 */
-/***/ function(module, exports) {
-
-	module.exports = function(object, proto) {
-		for (var prop in proto) {
-			if (proto.hasOwnProperty(prop)) {
-				if ("object"===typeof proto[prop]) {
-					object[prop] = new Object(proto[prop]);
-				} else {
-					object[prop] = proto[prop];
-				}
-			}
-		}
-	};
-
-/***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2059,18 +2069,17 @@ define(function() { return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 25 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var __WEBPACK_AMD_DEFINE_RESULT__;module.exports = Object.create(null, {
+	module.exports = Object.create(null, {
 		"exports": {
 			set: function(module) {
-				
-				!(__WEBPACK_AMD_DEFINE_RESULT__ = function() {
+				Vendor.define(function() {
 					return module;
-				}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+				});
 			}
 		}
 	});
 
 /***/ }
-/******/ ])});;
+/******/ ]);
