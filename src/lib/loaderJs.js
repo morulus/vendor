@@ -17,7 +17,7 @@ javascriptLoader.prototype = {
         this.script = document.createElement("SCRIPT");
        
         this.script.setAttribute("type", "text/javascript");
-        this.script.setAttribute("async", !this.resource.sync);
+        this.script.setAttribute("async", true);
 
         /*
 		Проверка на interactive необходимо для правильного связывания define со скриптом.

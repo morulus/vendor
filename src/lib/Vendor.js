@@ -10,14 +10,14 @@ var dirname = require('./dirname.js');
 /*
 Основная функция vendor
 */
-var Vendor = function(resources, callback) {
+var Vendor = function(resources, callback, options) {
 	
 	if ("function"!==typeof callback) {
 		// CommonJs like request
 		throw new Error('VendorJs do not supports CommonJs style for require() function. In AMD style the function require() must have callback function at second argument. Use Browserify or Webpack compiler to build AMD bundle.');
 	} else {
 		// Amd request
-		Vendor.anonymModule(false, resources, callback);
+		Vendor.anonymModule(false, resources, callback, options||{});
 	}
 }
 

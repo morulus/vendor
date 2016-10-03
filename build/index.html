@@ -14,9 +14,11 @@
 		}
 	}</script>
 	<script>
-		require('modules/abracadabra.js', function(abracadabra) {
-			document.body.innerHTML = '<h1>'+abracadabra()+'</h1>';
+	
+		require('modules/drawer.js', function(drawer) {
+			require('modules/abracadabra.js', drawer);
 		});
+		
 	</script>
 </head>
 <body>
