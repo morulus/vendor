@@ -21,6 +21,17 @@ var Vendor = function(resources, callback) {
 	}
 }
 
+/**
+ * Similar to vendor(), but returns Promise
+ * @param  {[type]} resources [description]
+ * @return {[type]}           [description]
+ */
+Vendor.async = function(resources) {
+	return new Promise(function(resolve, reject) {
+		this(resources, resolve);
+	}.bind(Vendor));
+}
+
 Vendor.Module = Module;
 
 /*
