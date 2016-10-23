@@ -7,12 +7,15 @@
   "description": "Another way to use AMD",
   "main": "vendor.js",
   "ignore": [
-    "*.MD",
     "dist",
     "*.html",
     "images",
     "style",
-    ".htaccess"
+    "deploy.js",
+    "webpack.config.js",
+    "node_modules",
+    ".htaccess",
+    ""
   ],
   "moduleType": [
     "globals"

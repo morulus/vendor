@@ -11,8 +11,6 @@ module.exports = function(pure, force) {
        return 1;
     } else if (pure.substr(pure.length-4, 4).toLowerCase()=='.css') {
         return 2;
-    } else if (pure.substr(pure.length-10, 10).toLowerCase()=='bower.json') {
-        return 3;
     } else if (pure.substr(pure.length-5, 5).toLowerCase()=='.json') {
        return 4;
     } else if (imagesRegExpr.test(pure)) {
