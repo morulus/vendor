@@ -4,15 +4,21 @@ var domain = require('./domain.js');
 var mixin = require('./mixin.js');
 var Resource = require('./Resource.js');
 var Module = require('./Module.js');
+var normalize = require('./normalize.js');
+var dirname = require('./dirname.js');
 
 /*
 Основная функция vendor
 */
-var Vendor = function(resources, callback) {
-	/*
-	Создаем имитацию ресурса
-	*/
-	Vendor.anonymModule(false, resources, callback);
+var Vendor = function(resources, callback, options) {
+	
+	if ("function"!==typeof callback) {
+		// CommonJs like request
+		throw new Error('VendorJs do not supports CommonJs style for require() function. In AMD style the function require() must have callback function at second argument. Use Browserify or Webpack compiler to build AMD bundle.');
+	} else {
+		// Amd request
+		Vendor.anonymModule(false, resources, callback, options||{});
+	}
 }
 
 Vendor.Module = Module;
@@ -29,6 +35,7 @@ Vendor.addAlias = function(name, path) {
 Создает новый анонимный модуль
 */
 Vendor.anonymModule = function(name, resources, callback, config) {
+
 	
 	/*
 	У нас выходит так, что любая загрузка начинается с анонимного модуля,
@@ -167,6 +174,9 @@ Vendor.config({
 	makeStack: false // Make stack error on each request (for debug)
 });
 
+
+Vendor.loaders = {};
+
 /*
 Эта функция принимает только абсолютный путь или он будет преобразован в абсолютный самым примитивным образом
 */
@@ -224,8 +234,7 @@ Vendor.info = function(src, callback) {
 	return {
 		url: url,
 		dirname: dirname(url),
-		domain: domain(url),
-		type: resourceTypeMap[determineResourceType(url)]
+		domain: domain(url)
 	}
 }
 

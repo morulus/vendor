@@ -1,8 +1,7 @@
 module.exports = Object.create(null, {
 	"exports": {
 		set: function(module) {
-			
-			define(function() {
+			Vendor.define(function() {
 				return module;
 			});
 		}

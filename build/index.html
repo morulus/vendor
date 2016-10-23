@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Test vendot</title>
+	<script type="text/javascript" src="vendor.js">{
+		modules: {
+			wordBuilder: function() {
+				return Array.prototype.join.call(arguments, '');
+			}
+		},
+		aliases: {
+			stylizer: '/modules/stylizer.js'
+		}
+	}</script>
+	<script>
+	
+		require('modules/drawer.js', function(drawer) {
+			require('modules/abracadabra.js', drawer);
+		});
+		
+	</script>
+</head>
+<body>
+	Magic doesn't work :()
+</body>
+</html>
