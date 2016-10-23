@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Test vendot</title>
-	<script type="text/javascript" src="vendor.js">{
+	<script type="text/javascript" src="./../vendor.js" baseUrl='/build'>{
 		modules: {
 			wordBuilder: function() {
 				return Array.prototype.join.call(arguments, '');
@@ -15,8 +15,8 @@
 	}</script>
 	<script>
 	
-		require('modules/drawer.js', function(drawer) {
-			require('modules/abracadabra.js', drawer);
+		vendor('modules/drawer.js', function(drawer) {
+			vendor('modules/abracadabra.js', drawer);
 		});
 		
 	</script>

@@ -1,13 +1,12 @@
 {
   "name": "vendor",
-  "version": "1.3.2",
+  "version": "1.3.4",
   "authors": [
     "Morulus <vladimirmorulus@gmail.com>"
   ],
   "description": "Another way to use AMD",
   "main": "vendor.js",
   "ignore": [
-    "dist",
     "*.html",
     "images",
     "style",
