@@ -102,7 +102,12 @@ Debugging works with two functions: debug() and watch()
 #### debug()
 Use vendor.debug function to see reports in console
 ```
-vendor.debug(['./load/my/file.js'], function() {});
+vendor.config({
+    paths: {
+        'jquery': 'vendor/jquery/dist/jquery'
+    }
+});
+vendor('jquery');
 ```
 
 #### watch(filename) 
@@ -117,11 +122,8 @@ Chrome,FF,Opera,Safari,webkit's browser in short, IE8+
 ## Author
 Vladimir Morulus (https://github.com/morulus/)
 
-## Updates
-
-### 1.3
-- Fixed problems with re-loading the script and relative paths 
-- Adds debug and watch functions
+## Why reinvent the wheel??
+What different between Requirejs, for example? — you can say. Simple reasons — the existence of Coca-Cola exclude the existence of other drinks? Good day.
 
 ## P.S
 Sorry my english.

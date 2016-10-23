@@ -1,5 +1,1 @@
-/node_modules
-/tests/bower_components
-/images/brown.jpg
-/images/marti.jpg
-/npm-debug.log
+node_modules

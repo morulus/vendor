@@ -1,295 +1,354 @@
-/* 
-@ Vendor 1.3
-@ author: Vladimir Morulus
-@ license: MIT 
-*/
-(function(_w) {
-	'use strict';
-	var httpmin_expr = /^([a-z]*):\/\/([^\?]*)$/i;
-	var normalize = function(url) {
-		var protocol,domain;
-		url=url.split('\\').join('/');
-		if (httpmin_expr.test(url)) {
-			var protdom = httpmin_expr.exec(url);
-			protocol=protdom[1];
-			domain=protdom[2];
-		} else {
-			protocol='http://';
-			domain=url;
+/*!
+ * The MIT License (MIT)
+ * 
+ * Copyright (c) 2014-2016 Vladimir Kalmykov
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var determineResourceType = __webpack_require__(1);
+	var dirname = __webpack_require__(4);
+	var domain = __webpack_require__(5);
+	var events = __webpack_require__(7);
+	var getXmlHttp = __webpack_require__(8);
+	var $inject = __webpack_require__(9);
+	var mixin = __webpack_require__(10);
+	var normalize = __webpack_require__(11);
+	var queryString = __webpack_require__(13);
+	var isInteractiveMode = __webpack_require__(14);
+	var Vendor = __webpack_require__(15);
+	var Define = __webpack_require__(24);
+	var commonJsModule = __webpack_require__(25);
+	var Module = __webpack_require__(23);
+	var Resource = __webpack_require__(16);
+
+
+		/*
+		Полифилы и константы
+		*/
+		var httpmin_expr = /^([a-z]*):\/\/([^\?]*)$/i;
+
+		Vendor.browser = {};
+
+		// Определение браузера
+		Vendor.browser.is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+		Vendor.browser.is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
+		Vendor.browser.is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
+		Vendor.browser.is_safari = navigator.userAgent.indexOf("Safari") > -1;
+		Vendor.browser.is_Opera = navigator.userAgent.indexOf("Presto") > -1;
+		if ((Vendor.browser.is_chrome)&&(Vendor.browser.is_safari)) {Vendor.browser.is_safari=false;}
+
+		/*
+		forEach polyfill
+		*/
+		if (!Array.prototype.forEach) Array.prototype.forEach = function(callback) {
+			for (var i = 0;i<this.length;i++) {
+				callback.call(this[i], this[i], i);
+			}
 		}
 
-		var urlp = domain.split('/');
-		
-		var res = [];
-		for (var i = 0;i<urlp.length;++i) {
-			if (urlp[i]==='') continue;
-			if (urlp[i]==='.') continue;
-			if (urlp[i]==='..') { res.pop(); continue; }
-			res.push(urlp[i]);
+		/*
+		Bind polyfill
+		*/
+		if (!Function.prototype.bind) Function.prototype.bind = function(obj) {
+			var fn = this,
+			args = Array.prototype.slice.call(arguments, 1);
+			return function(){
+			    return fn.apply(obj, args.concat(Array.prototype.slice.call(arguments)));
+			}
 		}
 
-		return protocol+'://'+res.join('/');
-	};
+		// indexOf polyfill
+		if ("undefined"==typeof Array.prototype.indexOf)
+		Array.prototype.indexOf = function(obj, start) {
+		     for (var i = (start || 0), j = this.length; i < j; i++) {
+		         if (this[i] === obj) { return i; }
+		     }
+		     return -1;
+		}
 
-	// Несколько приватных данных
-	var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
-	var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
-	var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
-	var is_safari = navigator.userAgent.indexOf("Safari") > -1;
-	var is_Opera = navigator.userAgent.indexOf("Presto") > -1;
-	if ((is_chrome)&&(is_safari)) {is_safari=false;}
+		/* Fix window.location.origin */
+		if (!window.location.origin) {
+		  window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+		}
 
-	// Fix for IE
-	if ("undefined"==typeof Array.prototype.indexOf)
-	Array.prototype.indexOf = function(obj, start) {
-	     for (var i = (start || 0), j = this.length; i < j; i++) {
-	         if (this[i] === obj) { return i; }
-	     }
-	     return -1;
-	}
-	if (!_w.location.origin) {
-	  _w.location.origin = _w.location.protocol + "//" + _w.location.hostname + (_w.location.port ? ':' + _w.location.port: '');
-	}
-	
-	_w.vendor = function(userresources, callback) {
-		
-		if ("object"===typeof this && this.constructor==Object) {
-			var config = this; 
+		/* Автоопределение положения vendor */
+		;(function() {
 
-		} else var config = {};
-		
-		var progressor = new (function(userresources, callback, config) {
-
-			this.config = {
-				ownerLocation: false,
-				ownerScriptName: 'root'
-			};
-
-			for (var i in config) {
-				if (config.hasOwnProperty(i)) this.config[i] = config[i];
-			}
-
-			this.userresources = userresources;
-			this.callback = callback;
-			this.loadings = 0;
-			this.queue = [];
-			this.execute = function() {
-				if ("string"===typeof this.userresources) this.userresources = [userresources];
-				this.max=this.loadings=this.userresources.length;
-				for (var i = 0;i<this.userresources.length;i++) {
-
-					this.determine(this.userresources[i]);
-				}
-			};
-			this.loaded = function(module) {
+			var g = document.getElementsByTagName("SCRIPT");
+			var srci = false, bsk = false, bwk = false;
+			for (var j in g) {
 				
-				this.loadings--;
-				this.progress = 1-(this.loadings/this.max);
-				if (this.eachCallback) this.eachCallback.call(this, module);
-				if (this.loadings===0) {
-
-					if ("function"===typeof this.callback) this.callback.apply(window,this.queue);
+				if (typeof g[j].attributes == "object") {
+					// Search for src					
+					for (var z=0;z<g[j].attributes.length;z++) {
+						if (g[j].attributes[z].name.toLowerCase()==='src') {
+							
+							if (z!==false && typeof g[j].attributes === "object" && typeof g[j].attributes[z] === "object" && g[j].attributes[z] != null && /vendor\.js/.test(g[j].attributes[z].value)) {
+								
+								srci = z;
+								break;
+							};
+						};
+					}
 				}
-			}
-			this.determine = function(path) {
-
-				
-
-				/* Проверяем наличие точки вначале пути, это будет сведетельствовать о том, что это относительный путь. В случае, если файл исполняется из другого модуля мы сможем загрузить файл по относительному пути */
-				if (path.substring(0,2)==='./') {
-
-					var rawpath = path;
-					/* Проверяет преднастройки данного объекта, если относительный путь был взыван в define, то define должен был передать местоположение модуля, который вызвал define */
+				if (srci!==false) {
 					
-					if (this.config.ownerLocation) {
-						var path = this.config.ownerLocation+rawpath.substring(2, rawpath.length);
-					} 
+					// Search for baseUrl					
+					for (var z=0;z<g[j].attributes.length;z++) {
+
+						if (g[j].attributes[z].name.toLowerCase()==='baseurl') {
+
+							bsk = z;
+							break;
+						};
+					}
+					// Search for bowerComponents					
+					for (var z=0;z<g[j].attributes.length;z++) {
+						if (g[j].attributes[z].name.toLowerCase()==='bower-components') {
+							bwk = z;
+							break;
+						};
+					}
+					// Parse location
+					var f = document.location.href;
+					if (f.lastIndexOf('/')>7) f = f.substring(0, f.lastIndexOf('/'));
+					
+					if (f.substr(-1)=='/') f = f.substr(0,-1);
+
+					if (bsk!==false) {
 						
-				};
-
-				var that = this;
-				this.queue.push(null);
-
-				var q = this.queue.length-1;
-				var pure = (function(path) { var qp = path.lastIndexOf('?'); if (qp<0) qp = path.length; return path.substring(0,qp); })(path);
-
-
-
-				// Js file
-				if (pure.substr(pure.length-3, 3).toLowerCase()=='.js') {
+						var h = g[j].attributes[bsk].value;
+						
+						if (h.substr(0,1)==='/') {
+							var match = f.match(/^(http?[s]?:\/\/[^\/]*)/);
+							if (match!==null) f = match[1];
+						}
+						var baseUrl = (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)==='/' ? '' : '/') + h);
+						
+					}
+					else {
+						
+						var i = g[j].attributes[srci].value.toLowerCase();
+						var h = i.split("vendor.js");
+						var baseUrl = (h[0].substr(0,5)=='http:') ? h[0] : (f + (h[0].substr(0,1)=='/' ? '' : '/') + h[0])+(h[0].substr(h[0].length-1, 1)==='/' ? '' : '');
+							
+					}
+					if (baseUrl.substr(baseUrl.length-1, 1)!=='/') baseUrl=baseUrl+'/';
 					
-					vendor.require(path, function(module) {
-						that.queue[q] = module;
-						that.loaded(module);
-					});
-					return;
-				}
-				// Css file
-				if (pure.substr(pure.length-4, 4).toLowerCase()=='.css') {
-					
-					vendor.requirecss(path, function() {
-						that.queue[q] = null;
-						that.loaded(null);
-					});
-					return;
-				}
-				
-				// bower.json file
-				if (pure.substr(pure.length-10, 10).toLowerCase()=='bower.json') {
-					
-					vendor.bower(path, function(module) {
-						that.queue[q] = module;
-						that.loaded(module);
-					});
-					return;
-				}
-				// Json file
-				if (pure.substr(pure.length-5, 5).toLowerCase()=='.json') {
-					
-					vendor.getJson(path, function(module) {
-						that.queue[q] = module;
-						that.loaded(module);
-					});
-					return;
-				}
-				// Bower
-				if ('bower//'===pure.substr(0,7)) {
-					
-					vendor.bower(path.substring(5), function(module) {
-						that.queue[q] = module;
-						that.loaded(module);
-					});
-					return;
-				}
-				// Images
-				if (vendor.constants.imagesRegExpr.test(path)) {
-					
-					vendor.images(path, function(module) {
-						that.queue[q] = module;
-						that.loaded(module);
-					});
-					return;
-				}
-				/* Проверяем наличие точки в имени файла. Если она есть, значит это не js файл. Скорей всего это файл неизестного типа данных и там нужно подключить его как текстовый файл */
-				if (pure.lastIndexOf('.')>pure.lastIndexOf('/')) {
-					vendor.load(path, function(module) {
-						that.queue[q] = module;
-						that.loaded(module);
-					});
-					return;
-				}
-				// Если ни один из форматов не подошел, тогда мы воспринимает запрос как alias
-				vendor.require(path, function(module) {
-					that.queue[q] = module;
+					var importedConfig={
+						baseUrl: baseUrl,
+						bowerComponentsUrl: ((bwk!==false) ? (function() {
+						var h = g[j].attributes[bwk].value;
+						return (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)=='/' ? '' : '/') + h)+(h.substr(h.length-1, 1)==='/' ? '' : '');
+					})() : baseUrl+"bower_components/"),
+						noBowerrc: g[j].getAttribute('no-bowerrc') ? true : false,
+						defineAlias: g[j].getAttribute('define-alias') ? g[j].getAttribute('define-alias') : 'define',
+						requireAlias: g[j].getAttribute('require-alias') ? g[j].getAttribute('require-alias') : 'vendor',
+					};
+					/*
+					Анализируем контент внутри тэга
+					*/
+					try {
+						eval('importedConfig = mixin(importedConfig, '+g[j].innerHTML+')');
+					} catch(e) {
+						/* do nothing */
+					}			
 
-					that.loaded(module);
-				});
-			};
-			this.each = function(callback) {
-				this.eachCallback = callback;
-			};
-			this.execute();
-		})(userresources, callback, config);
-
-		return progressor;
-	};
-	/* Готовит преднастройки перед вызовом vendor */
-	_w.vendor.optional = function(config) {
-		var config = arguments[0];
-		var args = Array.prototype.slice.call(arguments);
-
-		args.shift();
-		
-		return vendor.apply(config,args);
-	}
-	_w.vendor.debug = function() {
-		this._config.debugMode = true;
-
-		return vendor.apply(this.config,arguments);
-		return this;
-	}
-	_w.vendor.watch = function() {
-		this._config.debugMode = true;
-		this._config.watchMode = true;
-		this._config.watchResource = arguments[0] instanceof Array ? arguments[0] : [arguments[0]];
-
-		var args = Array.prototype.slice.call(arguments, 1);
-
-		return vendor.apply(this.config,args);
-		return this;
-	}
-	_w.vendor.watchin = function(src) {
-		if (this._config.watchMode==false) return true;
-		if ("string"!==typeof src) return false;
-		for (var i = 0;i<this._config.watchResource.length;++i) {
-			if (src.indexOf(this._config.watchResource[i])>-1) return true;
-		}
-		return false;
-	}
-	_w.vendor.debuglog = function() {
-		if (!this._config.debugMode||"function"!==typeof console.log) return false;
-		var args = Array.prototype.slice.call(arguments, 1);
-		args.unshift('color:green;font-weight:bold');
-		args.unshift('%c'+arguments[0]+':');
-		console.log.apply(console, args);
-	}
-	_w.vendor.debugGroup = function(name) {
-		if (!this._config.debugMode||"function"!==typeof console.group) return false;
-		console.group(name);
-	}
-	_w.vendor.debugGroupEnd = function(name) {
-		if (!this._config.debugMode||"function"!==typeof console.groupEnd) return false;
-		console.groupEnd(name);
-	}
-	_w.vendor.alert = function() {
-		if (!this._config.debugMode||"function"!==typeof console.log) return false;
-		var args = Array.prototype.slice.apply(arguments);
-		args.unshift('color:red;font-weight:bold');
-		args.unshift('%cImportant:');
-		console.log.apply(console, args);
-	}
-	_w.vendor.constants = {
-		imagesRegExpr: /\.[jpg|jpeg|gif|png|bmp]*$/i
-	};
-	_w.vendor.state = {
-		interactive: false // Определяет иной способ обработки анонимный define функций через статус interactive
-	}
-	_w.vendor.isInteractiveMode = function(j) {
-		return (j.attachEvent && !(j.attachEvent.toString && j.attachEvent.toString().indexOf('[native code') < 0) &&
-	                   			 !(typeof opera !== 'undefined' && opera.toString() === '[object Opera]'));
-	}
-	_w.vendor.getInteractiveScript = function(execute, infoonly) {
-
-		for (var i=0;i<vendor._freezed.length;i++) {
-			
-			if (vendor._freezed[i]!==null && vendor._freezed[i].node.readyState === 'interactive') {
-
-				if (infoonly) {
-					execute(vendor._freezed[i]);
-				} else {
-					// Устаналиваем last, т.к. далее последует инициализация
-					_w.vendor.define._last = execute;
-					// Интерактивный скрипт найден, разморашиваем инициализацию
-
-					vendor._freezed[i].unfreeze();
-				}
-				return true;
+					Vendor.config(importedConfig);
+					// import
+					Vendor.selfLocationdefined = true;
+					// Search for import
+					if (g[j].getAttribute('data-import')) {
+						Vendor.defineDataImport = g[j].getAttribute('data-import');
+						Vendor.require(g[j].getAttribute('data-import'));
+					}
+					break;
+				}				
 			}
-		}
-		return false;
-	}
-	// Events support
-	_w.vendor.eventListners = {};
-	_w.vendor.bind = function(e, callback, once) {
-			var once = once;
+		})();
+
+		/*
+		Global registration
+		*/
+
+		window.Vendor = Vendor;
+		window.require = Vendor;
+		window.define = Define;
+		window[Vendor.config.requireAlias] = Vendor; // Set Require ALias Variable
+		window[Vendor.config.defineAlias] = Define; // Set Require ALias Variable
+		window.module = commonJsModule; // CommonJs supports
+
+		module.exports = Vendor;
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var imagesRegExpr = __webpack_require__(2);
+	var resourceTypeMap = __webpack_require__(3);
+
+	/*
+	Определяет тип ресурса
+	*/
+	module.exports = function(pure, force) {
+	    if (force&&!~resourceTypeMap.indexOf(force)) return resourceTypeMap.indexOf(force);
+	    // Js file
+	    if (pure.substr(pure.length-3, 3).toLowerCase()=='.js') {
+	       return 1;
+	    } else if (pure.substr(pure.length-4, 4).toLowerCase()=='.css') {
+	        return 2;
+	    } else if (pure.substr(pure.length-10, 10).toLowerCase()=='bower.json') {
+	        return 3;
+	    } else if (pure.substr(pure.length-5, 5).toLowerCase()=='.json') {
+	       return 4;
+	    } else if (imagesRegExpr.test(pure)) {
+	       return 5;
+	    } else if (pure.lastIndexOf('.')>pure.lastIndexOf('/')) {
+	        return 0;
+	    } else {
+	        return false;
+	    }
+	};
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	module.exports = /\.(jpg|jpeg|gif|png|bmp)*$/i;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = [
+	    'unknown',
+	    'javascript',
+	    'css',
+	    'bower',
+	    'json',
+	    'image'
+	];
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = function(url) {
+		url=url.split('\\').join('/').split('?')[0];
+		return url.substring(0, url.lastIndexOf('/')+1);
+	};
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var regExprDomain = __webpack_require__(6);
+
+	module.exports = function(url) {
+	    url=url.split('\\').join('/');
+	    if (regExprDomain.test(url)) {
+	    	var protodomen = regExprDomain.exec(url);
+	        return protodomen[1]+'://'+protodomen[2]+'/';
+	    } else {
+
+	        return window.location.origin+'/';
+	    }
+	};
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	module.exports = /^([a-z]*):\/\/([^\/]*)/i;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	module.exports = {
+		bind : function(e, callback, once) {
 			if (typeof this.eventListners[e] != 'object') this.eventListners[e] = [];
+			
 			this.eventListners[e].push({
 				callback: callback,
 				once: once
 			});
+
 			return this;
-	};
-	_w.vendor.trigger = function() {
+		},
+		on: function() {
+			this.bind.apply(this, arguments);
+			return this;
+		},	
+		once : function(e, callback) {
+			this.bind(e, callback, true);
+			return this;
+		},
+		trigger : function() {
 			
 			
 			if (typeof arguments[0] == 'integer') {
@@ -307,9 +366,11 @@
 			if (typeof this.eventListners[e] == 'object' && this.eventListners[e].length>0) {
 				var todelete = [];
 				for (var i = 0; i<this.eventListners[e].length; i++) {
-					if (typeof this.eventListners[e][i] == 'object') {
-						if (typeof this.eventListners[e][i].callback == "function") response = this.eventListners[e][i].callback.apply(this, args);
+					if (typeof this.eventListners[e][i] === 'object') {
+						if (typeof this.eventListners[e][i].callback === "function") response = this.eventListners[e][i].callback.apply(this, args);
+						
 						if (this.eventListners[e][i].once) {
+
 							todelete.push(i);
 						};
 					};
@@ -320,722 +381,1333 @@
 				};
 			};
 			return response;
-	};
-	// Require Javascript file
-	_w.vendor.require = function(c, b, phantom) {
+		},
+		ready : function() {
 
-		var phantom = phantom || false;
-		var a = new function(e, d) {
-			
-			if (typeof e == "string") {
-				e = [e]
+			if (arguments.length===0) {
+				this.isready = true;
+				this.trigger('ready');
+			} else if ("function"===typeof arguments[0]) {
+
+				if (this.isready) arguments[0].apply(this);
+				else this.bind('ready', arguments[0]);
 			}
-			this.loads = e.length;
-			this.src = e;
-			this.stop = false;
-			this.callback = d || false;
-			this.fabrics = [];
-			this.init = function() {
-				
-				var h = this;
-				/* Перебираем каждый адрес */
-
-				for (var i = 0; i < this.src.length; i++) {
-
-					var g = this.src[i];
-
-					// [upload_module] >>
-					/* 
-						Это фунционал вынесен в отдельну функция для поддержка относительного позиционаирования подключаемого модуля 
-						Этой функции должен быть передан путь к файлу
-					*/
-					var upload_module = function(f) {
-						var f = f;
-						/* Добавляем расширение .js если оно отсутствует */
-						var k = f.substr(f.length - 3, 3) != ".js" ? f + ".js" : f;
-						/* Нормализуем url */
-						var normalsrc = normalize((!/^http/.test(k) ? _w.vendor._config.baseUrl : "") + k + (function(l) {
-							if (l != "") {
-								return "?" + l
-							}
-							return ""
-						})(_w.vendor._config.urlArgs));
-
-						if (vendor.watchin(normalsrc)) vendor.debuglog('Require', normalsrc);
-
-						/* Преопределяем fabric для данного ресурс. Это нужно для того, что бы ... */
-						h.fabrics.push(normalsrc);
-
-						/* Если данный адрес уже был загружен, то пропускаем этам загрузки и сразу сообщаем, что компонент загружен */
-						try {
-
-							if (_w.vendor._defined.indexOf(normalsrc) > -1) {
-
-								h.loaded(normalsrc);
-								return false;
-							} else {
-
-							}
-						} catch(e) {
-							/* IE 8 */
-							
-						}
-
-						/* --- Continue: элемент был найден в списках загруженных элементов */
-						/* ---------------------------------------------------------------- */
-						
-
-						/* Проверяем надичие элемента в списке vendor.define.modules. Ведь запрашиваемвый элемент мог быть просто предопределен через vendor.define. */
-						
-						if ('undefined' !== typeof _w.vendor.define._modules[normalsrc]) {
-							if (vendor.watchin(normalsrc)) vendor.debuglog("Download interrupted, the module already exists", normalsrc);
-							h.loaded(normalsrc);
-							return false;
-						}
-						
-						/* --- Continue: элемент был найден в списках vendor.define. 				*/
-						/* ---------------------------------------------------------------- */
-						
-
-						/* Поскольку один и тот же ресурс может быть запрошен в разных ветках, мы должны его проверить на присутствие в специальных списках vendor._detained, куда мы определяем элементы, которые на данный момент уже проходят загрузку */
-						
-						if (vendor._detained.indexOf(normalsrc)>-1) {
-							if (vendor.watchin(normalsrc)) vendor.debuglog('Download canceled because it is already in progress', normalsrc);
-							/* Если ресурс уже подгружается в параллельных ветках, то мы начинаем слушать завершения его подгрузки*/
-							vendor._onRedetain(normalsrc, function() {
-								/* Если ресурс не попал в define списки, т.е. он не поддерживает архитектуру AMD, тогда мы его просто закидываем в список загруженных модулей.
-								Здесь g - это пользовательское имя ресурса, f - это полное имя ресурса, в том виде в каком он присутствует в _config.paths, k  - это реальный путь до файла */
-								if ("undefined" == typeof _w.vendor.define._modules[normalsrc])
-								if (_w.vendor._defined.indexOf(normalsrc)<0) _w.vendor._defined.push(normalsrc);
-								/* Учитывая, что загрузка свершилась, мы вызываем loaded() */	
-								h.loaded(normalsrc)
-							});
-							return false;
-						} else {
-
-							/* Если ресурс запрошен впервые, мы его определяем в список detained, что бы параллельные ветки загрузок могли знать, что ресурс уже загружается */
-							vendor._detained.push(normalsrc); 
-
-							/* Согласно вопросу совместимости с синхронными загрузками, нам нужно произвести тест на подгрузку данного ресурса нативно. Нативная подгрузка лишает нас возможности использовать AMD интерфейс, но дает возможность работы с сайтами, на которых нативная подгрузка уже не отъемлена. 
-							Мы тестируем страницу на присутствие тэга SCRIPT с подгружаемым адресом.
-							Функция test требует аргумента - реальный путь до файла.
-							Поскольку все асинхронные загрузки так или иначе попадают в detained, и так или иначе, не доходят до данной точки кода, если уже были асиенхронно подключены, конфликт с сгененрированными тэгами исключен. */
-							var test = (function(scriptp) {
-					            var exi = document.getElementsByTagName("SCRIPT");
-					            for (var j in exi) {
-					              // Search for src
-					              if (typeof exi[j].attributes == "object") {
-					                var srci = false;
-					                for (var z=0;z<exi[j].attributes.length;z++) {
-					                  if (exi[j].attributes[z].name.toLowerCase()=='src') {
-					                    
-					                    srci = z;
-					                    break;
-					                  };
-					                }
-					              }
-					      
-					              if (srci!==false && typeof exi[j].attributes == "object" && typeof exi[j].attributes[srci] == "object" && exi[j].attributes[srci] != null && exi[j].attributes[srci].value == scriptp) {
-					                return exi[j];
-					              }
-					            }
-					            return false;
-					        })(k);
-					        /* Передав в функцию k (полный адрес ресурса), мы получили значение его присутствие в нативных тэгах. */
-					        if (test!==false) {
-					         	/* Если test !=== false, значит он содержит ссылку на node нативного скрипта. 
-					         	asynch нам нужен, что бы позже определить как мы будет проверять загружен ли скрипт.
-					         	*/
-								var asynch = false;
-								/* В j мы помещаем ссылку на элемент SCRIPT.*/
-									var j = test;
-					        } else {
-					          	/* Если нативного скрипта не существует, то мы можем создать его на лету. */
-					            var asynch = true;
-					            /* Создаем элемент SCRIPT без присвоения к документу, это вынужденное действие для работы с IE8 */
-					            var j = document.createElement("SCRIPT");
-					           
-					            j.setAttribute("type", "text/javascript");
-					            j.setAttribute("async", true);
-					         };
-					          	/* (!) Возможно depricated функция */
-								var define = function(f) {
-									
-								};
-
-								/* Итак мы дошли до данного кода, так как элемент загружается впервые или он загружен (загружается) нативно. Это значит, что нам нужно определить загружен ли он. */
-								(function(s, j) {
-
-					              /* Определяем функцию, которая так или иначе будет выполнена при загрузке ресурса */
-					              var lse = function(interactive) {
-					              	if (vendor.watchin(normalsrc)) vendor.debuglog('Loaded ', j.src);
-					              	if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete" || interactive) {
-					              		
-					              		vendor.trigger('moduleLoaded', [j]);
-						              	/* Если внутри ресурса была определена функция define с зависимостями, значит помимо загрузки основного скрипта нам нужно ждать так же загрузки саб-ресурсов.
-						              	Т.е. если происходит внутренний include, мы должны ждать его завершения. 
-						              	Поэтому, нужно произвести тестирование */
-
-						              	/* Создаем функцию, которая определяет 100% загрузку компонента */
-						              	var ok = function(defi) {
-						              		
-						              		 /* Если ресурс не определен в vendor.define._modules, нам нужно проследить, были вызвана функция vendor.define. 
-							                Фабрики фиксируются в переменной _last модуля vendor.define. Здесь мы выполняем данную функцию и получаем переменную, которую вернула fabric компонента. 
-							                В типичном случае присвоение знаения vendor.define._modules происходит в самой функции define, однако программист может вызвать define без указания имени компонента, тогда фабрика будет присваиваться последнему вызванному ресурсу. */             
-							                if ("undefined" == typeof _w.vendor.define._modules[normalsrc]) {
-							                	
-								                _w.vendor.define._modules[normalsrc] = {
-								                  fabric: defi || null
-								                };  
-							            	};
-						              		/* Если ресурс присутствует в списках _detained, мы должна сообщить глобально о том, что он загружен */
-
-						                	if (vendor._detained.indexOf(normalsrc)>-1) vendor.releaseDetained(normalsrc);
-						                	 /* Определяем ресурс как загруженный, более для него не будет производиться никаких действий при следующем вызове. */
-							                if (_w.vendor._defined.indexOf(normalsrc)<0) 
-							                {				                  
-							                  	_w.vendor._defined.push(normalsrc);
-							                };
-							                /* Сообщаем ветке о том, что ресурс был загружен */
-
-							                h.loaded(normalsrc)
-						              	};
-
-
-						              	/* проверяем last на наличие функции */
-						              	if ("function"===typeof _w.vendor.define._last) {
-						              		/* Если last - функция, мы должны выполнить её передав callback код завершения загрузки данного модуля */
-						              		
-						              		_w.vendor.define._last(ok, j);
-
-						              		/* 
-						              		! _w.vendor.define._last = false; 
-						              		Данная процедура была удалена из-за совместимости с IE9. Необходимо провести тщательные тесты касательно
-						              		данной функции.
-						              		*/
-
-						              	} else {
-
-						              		ok();
-						              	};
-						              	/* Чистим память */
-						              	j.onload = j.onreadystatechange = null;
-						              	/* Удаляем скрипт */
-						              	try {
-							              	(function() {
-							                  return document.documentElement || document.getElementsByTagName("HEAD")[0];
-							                })().removeChild(j);
-							            } catch(e) {
-							            	if (typeof console=="object" && "function"==typeof console.log)
-							            	if (_w.vendor.debugMode) console.log('vendor.js: script node is already removed by another script', j);
-							            }
-					               	 };
-					              };
-
-
-					              /* Определяем метод распознавания загрузки */				        
-					              if (asynch) {
-					              	/* Загрузка созданного на лету элемента SCRIPT 
-									IE ведет себя очень плохо, он может выполнять скрипт не сразу после загрузки, что вызывает проблемы с анонимным define.
-									Решение пришлось подсмотреть в requirejs. Использовать статус `interactive` readyStage.
-					              	*/
-
-					              	if (vendor.isInteractiveMode(j)) {
-
-					        				vendor.state.interactive = true;
-					       			 		/* Если модуль работает в режиме статуса интерактив, мы должны отложить его инициализацию до момента когда define из модуля будет вызван */
-					       			 		
-
-								 				/* Нам подходит только loaded или complete */
-								 				
-					   			 			var id = vendor._freezed.length;
-
-					   			 			vendor._freezed.push({
-					              				unfreeze: function() {
-					              					
-					              					vendor._freezed[id] = null; // Обнуляем сами себя
-					              					lse(true); // Начинаем инициализацию
-					              				},
-					              				node: j
-					              			});
-
-					              			/*
-												Если в модуле не присутствует define, что vendor может предполагать, мы должны призвести инициализацию принудительно
-					              			*/
-					              			setTimeout(function() {
-
-					              			},50);
-					              			// Подчищаем хвосты
-					       			 		
-					       			 		j.onload = j.onreadystatechange = function() {
-					       			 			if (j.readyState==='loaded'||j.readyState==='complete') {
-
-					       			 				lse();
-					       			 			}
-					       			 		}
-
-					       			 } else {
-					       			 		j.onload = j.onreadystatechange = lse;
-					       			 };
-					               
-					              }
-					              else {
-						               /* Загрузка по событию onload документа, так как оследить загружен ли несинхронный скрипт мы не можем.
-						               Скрипт подгрузки документа взят отсюда: https://github.com/dperini/ContentLoaded/blob/master/src/contentloaded.js
-						                */
-						                /*!
-										 * contentloaded.js
-										 *
-										 * Author: Diego Perini (diego.perini at gmail.com)
-										 * Summary: cross-browser wrapper for DOMContentLoaded
-										 * Updated: 20101020
-										 * License: MIT
-										 * Version: 1.2
-										 *
-										 * URL:
-										 * http://javascript.nwbox.com/ContentLoaded/
-										 * http://javascript.nwbox.com/ContentLoaded/MIT-LICENSE
-										 *
-										 */
-						                (function (win, fn) {
-							                  var done = false, top = true,
-							              
-							                  doc = win.document, root = doc.documentElement,
-							              
-							                  add = doc.addEventListener ? 'addEventListener' : 'attachEvent',
-							                  rem = doc.addEventListener ? 'removeEventListener' : 'detachEvent',
-							                  pre = doc.addEventListener ? '' : 'on',
-							              
-							                  init = function(e) {
-							                      if (e.type == 'readystatechange' && doc.readyState != 'complete') return;
-							                      (e.type == 'load' ? win : doc)[rem](pre + e.type, init, false);
-							                      if (!done && (done = true)) fn.call(win, e.type || e);
-							                  },
-							              
-							                  poll = function() {
-							                      try { root.doScroll('left'); } catch(e) { setTimeout(poll, 50); return; }
-							                      init('poll');
-							                  };
-							              
-							                  if (doc.readyState == 'complete') fn.call(win, 'lazy');
-							                  else {
-							                      if (doc.createEventObject && root.doScroll) {
-							                          try { top = !win.frameElement; } catch(e) { }
-							                          if (top) poll();
-							                      }
-							                      doc[add](pre + 'DOMContentLoaded', init, false);
-							                      doc[add](pre + 'readystatechange', init, false);
-							                      win[add](pre + 'load', init, false);
-							                  }
-							              
-						            	})(window, lse);
-					       			};
-					        })(normalsrc, j); // normalsrc - пользовательское имя скрипта, j - ссылка на элемент SCRIPT
-							
-							/* Если мы дошли до этой части скрипта, значит мы создали асинхронный SCRIPT и теперь должны инициализировать загрузку ресурса */
-						
-					        if (asynch) {
-					        	
-					        	//vendor.debuglog('Async loading resouce', src);
-
-								j.src = normalsrc;
-								
-								/* Лишь после присвоения src мы вставляем скрипт на страницу */
-								
-								(function() {
-					              return document.documentElement || document.getElementsByTagName("HEAD")[0];
-					            })().appendChild(j);
-							};
-						};
-					};
-					// < [upload_module]
-
-					
-					/* Устанавливаем реальный адрес исходя из предустановок _config.paths */
-					var f = (typeof _w.vendor._config.paths[this.src[i]] == "string") ? _w.vendor._config.paths[this.src[i]] : this.src[i];
-					
-					upload_module(f);
-					
-					
-					
-				}
-			};
-			/* Функция сообщает о том, что модуль загружен */
-			this.loaded = function(j, f) {
-
-				if (this.stop) {
-					return;
-				}
-				this.loads--;
-				
-				if (this.loads < 1) {
-
-					if (typeof this.callback == "function") {
-
-						var h = [];
-						
-						for (var g = 0; g < this.fabrics.length; g++) {
-							
-							if ("undefined" != typeof _w.vendor.define._modules[this.fabrics[g]]) {
-								
-								h.push(null != _w.vendor.define._modules[this.fabrics[g]] ? _w.vendor.define._modules[this.fabrics[g]].fabric : null)
-							} else {
-								
-								h.push(null)
-							}
-						}
-						this.callback.apply(window, h)
-					}
-					this.stop = true
-				}
-			};
-			this.init()
-		}(c, b || false)
-	};
-	_w.vendor.ext = _w.vendor.prototype = {
-		selector: "",
-		constructor: _w.vendor,
-		init: function() {
-			return _w.vendor.ext.constructor
-		}
-	};
-	_w.selfLocationdefined = false; // Means we know our location
-	_w.vendor.defineDataImport = false;
-	_w.vendor._detained = [];
-	_w.vendor._freezed = [];
-	_w.vendor.queue = {
-
-	};
-	_w.vendor._onRedetain = function(d, f) {
-		typeof _w.vendor.queue[d] != "object" && (_w.vendor.queue[d] = []);
-		_w.vendor.queue[d].push(f);
-	};
-	_w.vendor.releaseDetained = function(d){
-		
-		var nd = [];
-		for (var dt = 0;dt<_w.vendor._detained.length;dt++) {
-			if (_w.vendor._detained[dt]!=d) nd.push(_w.vendor._detained[dt]);
-		}
-		_w.vendor._detained = nd;
-		
-		
-		typeof _w.vendor.queue[d] == "object" && (function(d, q) {
-
-			for (var i=0;i<q[d].length;i++) {
-				
-				q[d][i]();
-			};
-			delete q[d];
-		})(d, _w.vendor.queue);
-
-
-	};
-	_w.vendor._defined = [];
-	_w.vendor._config = {
-		baseUrl: "",
-		urlArgs: "",
-		bowerComponentsUrl: _w.location.origin+"/bower_components/",
-		noBowerrc: true, // Не читать файл .bowerrc в корне сайта
-		paths: {},
-		debugMode: false,
-		watchMode: false,
-		watchResource: []
-	};
-
-	_w.vendor.brahmaInside = true;
-	_w.vendor.config = function(f) {
-		
-		var f = f || {};
-		if (typeof f.paths == "object") {
-			for (var b in f.paths) {
-				_w.vendor._config.paths[b] = f.paths[b]
-			}
-			delete f.paths
-		}
-		for (var a in f) {
-			_w.vendor._config[a] = f[a]
+			return this;
 		}
 	}
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	module.exports = function(){
+	var xmlhttp;
+	try {
+	  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+	} catch (e) {
+	  try {
+	    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	  } catch (E) {
+	    xmlhttp = false;
+	  }
+	}
+	if (!xmlhttp && typeof XMLHttpRequest!='undefined') {
+	  xmlhttp = new XMLHttpRequest();
+	}
+	return xmlhttp;
+	};
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	var funcarguments = new RegExp(/[\d\t]*function[ ]?\(([^\)]*)\)/i),
+	scopesregex = /({[^{}}]*[\n\r]*})/g,
+	funcarguments = new RegExp(/[\d\t]*function[ ]?\(([^\)]*)\)/i),
+	getFunctionArguments = function(code) {
+	    if (funcarguments.test(code)) {
+	        var match = funcarguments.exec(code);
+	        return match[1].replace(/ /g,'').split(',');
+	    }
+	    return [];
+	};
+
+	module.exports = function(callback, context) {
+	    var prefixedArguments = [],
+	    requiredArguments = getFunctionArguments(callback.toString());
+
+
+	    for (var i = 0;i<requiredArguments.length;++i) {
+	        if (this instanceof Array) {
+	            for (var j = 0;j<this.length;++j) {
+	                if (this[j].hasOwnProperty(requiredArguments[i])
+	                    &&("object"===typeof this[j][requiredArguments[i]]||"function"===typeof this[j][requiredArguments[i]])) {
+	                    prefixedArguments[i] = this[j][requiredArguments[i]];
+	                }
+	            }
+	        }
+	        else if (this.hasOwnProperty(requiredArguments[i])
+	            && ("object"===typeof this[requiredArguments[i]] || "function"===typeof this[requiredArguments[i]])) {
+
+	            prefixedArguments[i] = this[requiredArguments[i]];
+	        }
+	    }
+	    
+	    var injected = function() {
+	        return callback.apply(context||this, prefixedArguments.concat(Array.prototype.slice.call(arguments)));
+	    }
+	    injected.$$injected = true;
+	    return injected;
+	}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	var mixinup = function(a,b) { 
+		for(var i in b) { 
+			
+			if (b.hasOwnProperty(i)) { 
+	          
+				a[i]=b[i]; 
+			} 
+		} 
+		return a; 
+	} 
+
+	module.exports = function(a) { 
+		var i=1; 
+		for (;i<arguments.length;i++) { 
+			if ("object"===typeof arguments[i]) {
+				mixinup(a,arguments[i]); 
+			} 
+		} 
+		return a;
+	}
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var domain = __webpack_require__(5);
+	var httpmin_expr_protocol = __webpack_require__(12);
+
+	module.exports = function(url) {
+
+	    var protocol,domain;
+	    url=url.split('\\').join('/');
+	    if (httpmin_expr_protocol.test(url)) {
+	        var protdom = httpmin_expr_protocol.exec(url);
+
+	        protocol=protdom[1];
+	        domain=protdom[2];
+	    } else {
+	        
+	        protocol='http://';
+	        domain=url;
+	    }
+
+	    var urlp = domain.split('/');
+	    
+
+
+
+	    var res = [];
+	    for (var i = 0;i<urlp.length;++i) {
+	        if (urlp[i]==='') continue;
+	        if (urlp[i]==='.') continue;
+	        if (urlp[i]==='..') { res.pop(); continue; }
+	        res.push(urlp[i]);
+	    }
+
+	    return protocol+'://'+res.join('/');
+	};
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = /^([a-z]*):\/\/([^ ]+)$/i;
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	
+	    var Utils={},stringify;
+	    Utils.hexTable = new Array(256);
+	    for (var i = 0; i < 256; ++i) {
+	        Utils.hexTable[i] = '%' + ((i < 16 ? '0' : '') + i.toString(16)).toUpperCase();
+	    }
+
+	    var internals = {
+	        delimiter: '&',
+	        arrayPrefixGenerators: {
+	            brackets: function (prefix, key) {
+
+	                return prefix + '[]';
+	            },
+	            indices: function (prefix, key) {
+
+	                return prefix + '[' + key + ']';
+	            },
+	            repeat: function (prefix, key) {
+
+	                return prefix;
+	            }
+	        },
+	        strictNullHandling: false
+	    };
+
+	    Utils.arrayToObject = function (source) {
+
+	        var obj = Object.create(null);
+	        for (var i = 0, il = source.length; i < il; ++i) {
+	            if (typeof source[i] !== 'undefined') {
+
+	                obj[i] = source[i];
+	            }
+	        }
+
+	        return obj;
+	    };
+
+
+	    Utils.merge = function (target, source) {
+
+	        if (!source) {
+	            return target;
+	        }
+
+	        if (typeof source !== 'object') {
+	            if (Array.isArray(target)) {
+	                target.push(source);
+	            }
+	            else if (typeof target === 'object') {
+	                target[source] = true;
+	            }
+	            else {
+	                target = [target, source];
+	            }
+
+	            return target;
+	        }
+
+	        if (typeof target !== 'object') {
+	            target = [target].concat(source);
+	            return target;
+	        }
+
+	        if (Array.isArray(target) &&
+	            !Array.isArray(source)) {
+
+	            target = exports.arrayToObject(target);
+	        }
+
+	        var keys = Object.keys(source);
+	        for (var k = 0, kl = keys.length; k < kl; ++k) {
+	            var key = keys[k];
+	            var value = source[key];
+
+	            if (!target[key]) {
+	                target[key] = value;
+	            }
+	            else {
+	                target[key] = exports.merge(target[key], value);
+	            }
+	        }
+
+	        return target;
+	    };
+
+
+	    Utils.decode = function (str) {
+
+	        try {
+	            return decodeURIComponent(str.replace(/\+/g, ' '));
+	        } catch (e) {
+	            return str;
+	        }
+	    };
+
+	    Utils.encode = function (str) {
+
+	        // This code was originally written by Brian White (mscdex) for the io.js core querystring library.
+	        // It has been adapted here for stricter adherence to RFC 3986
+	        if (str.length === 0) {
+	            return str;
+	        }
+
+	        if (typeof str !== 'string') {
+	            str = '' + str;
+	        }
+
+	        var out = '';
+	        for (var i = 0, il = str.length; i < il; ++i) {
+	            var c = str.charCodeAt(i);
+
+	            if (c === 0x2D || // -
+	                c === 0x2E || // .
+	                c === 0x5F || // _
+	                c === 0x7E || // ~
+	                (c >= 0x30 && c <= 0x39) || // 0-9
+	                (c >= 0x41 && c <= 0x5A) || // a-z
+	                (c >= 0x61 && c <= 0x7A)) { // A-Z
+
+	                out += str[i];
+	                continue;
+	            }
+
+	            if (c < 0x80) {
+	                out += Utils.hexTable[c];
+	                continue;
+	            }
+
+	            if (c < 0x800) {
+	                out += Utils.hexTable[0xC0 | (c >> 6)] + Utils.hexTable[0x80 | (c & 0x3F)];
+	                continue;
+	            }
+
+	            if (c < 0xD800 || c >= 0xE000) {
+	                out += Utils.hexTable[0xE0 | (c >> 12)] + Utils.hexTable[0x80 | ((c >> 6) & 0x3F)] + Utils.hexTable[0x80 | (c & 0x3F)];
+	                continue;
+	            }
+
+	            ++i;
+	            c = 0x10000 + (((c & 0x3FF) << 10) | (str.charCodeAt(i) & 0x3FF));
+	            out += Utils.hexTable[0xF0 | (c >> 18)] + Utils.hexTable[0x80 | ((c >> 12) & 0x3F)] + Utils.hexTable[0x80 | ((c >> 6) & 0x3F)] + Utils.hexTable[0x80 | (c & 0x3F)];
+	        }
+
+	        return out;
+	    };
+
+	    Utils.compact = function (obj, refs) {
+
+	        if (typeof obj !== 'object' ||
+	            obj === null) {
+
+	            return obj;
+	        }
+
+	        refs = refs || [];
+	        var lookup = refs.indexOf(obj);
+	        if (lookup !== -1) {
+	            return refs[lookup];
+	        }
+
+	        refs.push(obj);
+
+	        if (Array.isArray(obj)) {
+	            var compacted = [];
+
+	            for (var i = 0, il = obj.length; i < il; ++i) {
+	                if (typeof obj[i] !== 'undefined') {
+	                    compacted.push(obj[i]);
+	                }
+	            }
+
+	            return compacted;
+	        }
+
+	        var keys = Object.keys(obj);
+	        for (i = 0, il = keys.length; i < il; ++i) {
+	            var key = keys[i];
+	            obj[key] = exports.compact(obj[key], refs);
+	        }
+
+	        return obj;
+	    };
+
+
+	    Utils.isRegExp = function (obj) {
+
+	        return Object.prototype.toString.call(obj) === '[object RegExp]';
+	    };
+
+
+	    Utils.isBuffer = function (obj) {
+
+	        if (obj === null ||
+	            typeof obj === 'undefined') {
+
+	            return false;
+	        }
+
+	        return !!(obj.constructor &&
+	                  obj.constructor.isBuffer &&
+	                  obj.constructor.isBuffer(obj));
+	    };
+
+	    Utils.stringify = function (obj, prefix, generateArrayPrefix, strictNullHandling, filter) {
+
+	        if (typeof filter === 'function') {
+	            obj = filter(prefix, obj);
+	        }
+	        else if (Utils.isBuffer(obj)) {
+	            obj = obj.toString();
+	        }
+	        else if (obj instanceof Date) {
+	            obj = obj.toISOString();
+	        }
+	        else if (obj === null) {
+	            if (strictNullHandling) {
+	                return Utils.encode(prefix);
+	            }
+
+	            obj = '';
+	        }
+
+	        if (typeof obj === 'string' ||
+	            typeof obj === 'number' ||
+	            typeof obj === 'boolean') {
+
+	            return [Utils.encode(prefix) + '=' + Utils.encode(obj)];
+	        }
+
+	        var values = [];
+
+	        if (typeof obj === 'undefined') {
+	            return values;
+	        }
+
+	        var objKeys = Array.isArray(filter) ? filter : Object.keys(obj);
+	        for (var i = 0, il = objKeys.length; i < il; ++i) {
+	            var key = objKeys[i];
+
+	            if (Array.isArray(obj)) {
+	                values = values.concat(Utils.stringify(obj[key], generateArrayPrefix(prefix, key), generateArrayPrefix, strictNullHandling, filter));
+	            }
+	            else {
+	                values = values.concat(Utils.stringify(obj[key], prefix + '[' + key + ']', generateArrayPrefix, strictNullHandling, filter));
+	            }
+	        }
+
+	        return values;
+	    };
+
+	    module.exports = function (obj, options) {
+
+	        options = options || {};
+	        var delimiter = typeof options.delimiter === 'undefined' ? internals.delimiter : options.delimiter;
+	        var strictNullHandling = typeof options.strictNullHandling === 'boolean' ? options.strictNullHandling : internals.strictNullHandling;
+	        var objKeys;
+	        var filter;
+	        if (typeof options.filter === 'function') {
+	            filter = options.filter;
+	            obj = filter('', obj);
+	        }
+	        else if (Array.isArray(options.filter)) {
+	            objKeys = filter = options.filter;
+	        }
+
+	        var keys = [];
+
+	        if (typeof obj !== 'object' ||
+	            obj === null) {
+
+	            return '';
+	        }
+
+	        var arrayFormat;
+	        if (options.arrayFormat in internals.arrayPrefixGenerators) {
+	            arrayFormat = options.arrayFormat;
+	        }
+	        else if ('indices' in options) {
+	            arrayFormat = options.indices ? 'indices' : 'repeat';
+	        }
+	        else {
+	            arrayFormat = 'indices';
+	        }
+
+	        var generateArrayPrefix = internals.arrayPrefixGenerators[arrayFormat];
+
+	        if (!objKeys) {
+	            objKeys = Object.keys(obj);
+	        }
+	        for (var i = 0, il = objKeys.length; i < il; ++i) {
+	            var key = objKeys[i];
+	            keys = keys.concat(Utils.stringify(obj[key], key, generateArrayPrefix, strictNullHandling, filter));
+	        }
+
+	        return keys.join(delimiter);
+	    }
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	module.exports = function(j) {
+		return (j.attachEvent && !(j.attachEvent.toString && j.attachEvent.toString().indexOf('[native code') < 0) && !(typeof opera !== 'undefined' && opera.toString() === '[object Opera]'));
+	}
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var domain_expr = __webpack_require__(6);
+	var resourceTypeMap = __webpack_require__(3);
+	var domain = __webpack_require__(5);
+	var mixin = __webpack_require__(10);
+	var Resource = __webpack_require__(16);
+	var Module = __webpack_require__(23);
+	var normalize = __webpack_require__(11);
+	var dirname = __webpack_require__(4);
+
+	/*
+	Основная функция vendor
+	*/
+	var Vendor = function(resources, callback, options) {
 		
-	_w.vendor.define = function(g, e, b) {
+		if ("function"!==typeof callback) {
+			// CommonJs like request
+			throw new Error('VendorJs do not supports CommonJs style for require() function. In AMD style the function require() must have callback function at second argument. Use Browserify or Webpack compiler to build AMD bundle.');
+		} else {
+			// Amd request
+			Vendor.anonymModule(false, resources, callback, options||{});
+		}
+	}
+
+	Vendor.Module = Module;
+
+	/*
+	Зарегистрированные модули
+	*/
+	Vendor.modules = {};
+
+	Vendor.addAlias = function(name, path) {
+		Vendor.config.aliases[name] = path;
+	}
+	/*
+	Создает новый анонимный модуль
+	*/
+	Vendor.anonymModule = function(name, resources, callback, config) {
+
 		
-		// Если передана только фабрика
-		if (arguments.length==1) {
-			b=g; g=null; e=null;
+		/*
+		У нас выходит так, что любая загрузка начинается с анонимного модуля,
+		- а значит это подходящее место для подмены define. На сайте, на котором
+		будет использоваться Vendor может стоят что угодно, в т.ч. и RequireJS.
+		Если мы присвоим переменной define ссылку на функцию Vendor:define, то 
+		сам RequireJS станет нерабочим. Но мы можем подменять Define лишь на время
+		загрузки скрипта. Я назову этот ход borrowDefine.
+		*/
+		var caller = mixin({
+			location: Vendor.config.baseUrl,
+			module: {
+				exports: callback
+			}, /* Исходный путь */
+			script: null,
+			watch: false,
+			sync: false,
+			stack: vendor.config.makeStack ? (new Error("request").stack) : null
+		}, config||{});
+		
+		caller.root = caller;
+
+
+		return new Module(name||null, resources||null, Vendor.borrowDefine(callback||null), caller);
+	}
+	/*
+	Синхронная загрузка. На всегда загрузки приостанавливает работу сайта.
+	*/
+	Vendor.sync = function(resources, callback) {
+		var caller = {
+			location: Vendor.config.baseUrl,
+			module: {
+				exports: callback
+			}, /* Исходный путь */
+			script: null,
+			watch: false,
+			sync: true
+		};
+		
+		caller.root = caller;
+
+
+		return new Module(name||null, resources||null, Vendor.borrowDefine(callback||null), caller);
+	}
+
+	/*
+	Подмена функции window.define на время загрузки модуля.
+	Функция принимает в качестве аргумента коллбэк и возвращает этот же коллбэк, 
+	но в обертке возвращающий родной define на место.
+	Если "родного" define нету, функция просто возвращает usercall.
+	*/
+	Vendor.borrowDefine = function(usercall) {
+		
+		if (window.define!==Vendor.define) {
+
+			Vendor.$define_=window.define;
+			window.define=Vendor.define;
+
+			return function() {
+				
+				if ("function"===typeof usercall) usercall.apply(this, arguments);
+				if (!Vendor.isProcessed)
+				if (window.define===Vendor.define) window.define=Vendor.$define_;
+			}
+		} else {
+			return usercall
 		}
+	}
+	/*
+	Массив статистики процессов загрузки
+	*/
+	Vendor.processed = {
+		js: 0,
+		css: 0,
+		other: 0
+	};
+	/*
+	Объект, который содержит данные из только что вызванного define
+	*/
+	Vendor.last = null;
+	/*
+	Проверяет происходит ли в данный момент загрузка js файла
+	*/
+	Vendor.isProcessed = function() {
+		return (this.processed['js']>0);
+	}
 
-		// Если передано два аргумента
-		else if (arguments.length==2) {
-			// Переданы зависимости и фабрика
-			("object"==typeof g) && (b=e,e=g,g=null);
-			// Передано имя и фабрика
-			("string"==typeof g) && (b=e,e=0);
+	Vendor.resources = {};
+
+	Vendor.config = function(data) {
+		/*
+		Прежде чем симксовать конфигурацию, проверить некоторые параметры
+		*/
+		if ("object"===typeof data.modules) {
+			for (var mod in data.modules) {
+				if (data.modules.hasOwnProperty(mod)) {
+					this.registerModule(mod, {
+						exports: data.modules[mod]
+					})
+				}
+			}
+			delete data.modules;
+		};
+
+		mixin(Vendor.config, data);
+	}
+
+	Vendor.config.aliases = {};
+
+	Vendor.interactive = false; // Этот режим активен только для IE
+	Vendor.interactiveScripts = [];
+	Vendor.getInteractiveScript = function(data, infoonly) {
+		for (var i=0;i<Vendor.interactiveScripts.length;i++) {
+			
+			if (Vendor.interactiveScripts[i]!==null && Vendor.interactiveScripts[i].node.readyState === 'interactive') {
+
+				// Устаналиваем last, т.к. далее последует инициализация
+				Vendor.last = data;
+				// Интерактивный скрипт найден, разморашиваем инициализацию
+
+				Vendor.interactiveScripts[i].clear();
+				
+				return true;
+			}
 		}
-		// Переданы все аргументы
-		else {
-			"string" != typeof g && (b = e, e = g, g = null);
-			!(e instanceof Array) && (b = e, e = 0);
+		return false;
+	}
+
+	Vendor.config({
+		baseUrl: '/',
+		timeout: 5000,
+		publicName: 'vendor',
+		visualDebugger: false, // Отображает все модули на сайте в виде таблиц
+		defineAlias: 'define', 
+		requireAlias: 'vendor',
+		makeStack: false // Make stack error on each request (for debug)
+	});
+
+
+	Vendor.loaders = {};
+
+	/*
+	Эта функция принимает только абсолютный путь или он будет преобразован в абсолютный самым примитивным образом
+	*/
+	Vendor.get = function(src, config) {
+		var resourceUID = (config.forcetype?config.forcetype+'!':'')+src;
+		if ("object"!==typeof Vendor.resources[resourceUID]) {
+			Vendor.resources[resourceUID] = new Resource(src, config);
 		}
+		return Vendor.resources[resourceUID];
+	}
 
-		// Формируем humanfrendly переменные
-		var name = g || null;
-		var depends = e || null;
-		var fabric = b || null;
+	/*
+	Регистриует новый готовый модуль
+	*/
+	Vendor.registerModule = function(name, exports) {
+		Vendor.modules[name] = exports;
+	}
 
-		if (vendor.watchin()) vendor.debuglog('Define', name, depends, fabric);
+	/*
+	Парсеры url - это набор процедур по преобразованию пользовательского url в абсолютный url.
+	*/
+	Vendor.urlParsers = [
+		/*
+		Простое совпадение начала пути с именем alias
+		*/
+		function(url, settings) {
+			for (var a in settings.aliases) {
+				if (settings.aliases.hasOwnProperty(a)) {
+					if (a===url.substr(0, a.length)) {
+						return settings.aliases[a]+url.substr(a.length);
+					}
+				}
+			}
+			
+		    return url;
+		    
+		}
+	];
 
-		// После того как include выполняет модуль переменная initialed принимает значение true
-		// Если этого не происходит, то черещ 0,010 секунду выполнение модуля происходит автоматически
-		// (см. #autoexecute)
-		var initialed = false;
+	Vendor.addUrlParser = function(fn) {
+		Vendor.urlParsers.unshift(fn);
+	}
 
-		// Функция генерирует фабрику
-		var initial = function() {
-			initialed = true;
-			_w.vendor.define.synchCode = null;
-			switch(typeof fabric) {
-				case "function":
-					var product = fabric.apply(window, arguments);
+	/*
+	Выводит всю доступную информацию о файле. При наличии функции callback кроме
+	всего прочего произведет загрузку файла.
+	*/
+	Vendor.info = function(src, callback) {
+		var url = this.absolutizer(src, {
+			location:Vendor.config.baseUrl, 
+			root: Vendor.config.baseUrl,
+			aliases: Vendor.config.aliases
+		});
+
+		return {
+			url: url,
+			dirname: dirname(url),
+			domain: domain(url)
+		}
+	}
+
+	/*
+	Превращает любой путь в абсолютной на основе установок корневой локации и алиасов
+	*/
+	Vendor.absolutizer = function(url, settings) {
+	    for (var i=0;i<this.urlParsers.length;++i) {
+	        url = this.urlParsers[i](url, settings);
+	    }
+
+	    if (domain_expr.test(url)) {
+	        // Do nothing
+	    } else if (url.substring(0,2)==='./') {
+	        /* Локально-относительный путь */
+	        url = settings.location+url.substr(2);
+	    } else if (url.substring(0,1)==='/') {
+	        /* Путь от корня сайта */
+	        url = domain(settings.location)+url.substr(1);
+	    } else {
+	        /* Путь от baseUrl */
+	        url = settings.root+url;
+	    }
+
+	    /*
+	    Нормализация url
+	    */
+	    var url = normalize(url);
+	    /*
+	    Установка расширения, если оно отсутствует
+	    */
+	    if (!(url.lastIndexOf('/')<url.lastIndexOf('.'))) {
+	        url=url+'.js';
+	    }
+
+	    return url;
+	};
+
+	module.exports = Vendor;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var mixin = __webpack_require__(10);
+	var determineResourceType = __webpack_require__(1);
+	var javascriptLoader = __webpack_require__(17);
+	var cssLoader = __webpack_require__(18);
+	var fileLoader = __webpack_require__(19);
+	var imagesLoader = __webpack_require__(20);
+	var jsonLoader = __webpack_require__(21);
+	var events = __webpack_require__(7);
+	var dirname = __webpack_require__(4);
+	var charge = __webpack_require__(22);
+
+	/*
+	Абстрактный скрипт
+	*/
+	var Resource = function(url, config) {
+		
+		config = mixin({
+			root: this,
+			exports: false,
+			wait: false,
+			sync: false,
+			forcetype: false
+		}, config||{});
+
+
+
+		var rehash = url.split('#');
+
+		this.root = config.root;
+		this.forcetype = config.forcetype;
+		this.sourceurl = url;
+		this.url = rehash[0];
+		this.hash = rehash[1]||'master';
+		this.sync = config.sync || false;
+		this.location = dirname(url);
+		this.script = null;
+		this.eventListners = {};
+		this.isready = false;
+		this.module = null;
+
+		charge(this, events);
+
+		if (config.exports!==false) {
+			/*
+			Модуль предопределен
+			*/
+			this.module = {
+				exports: config.exports
+			}
+			/*
+			wait : true означается ожидание действий извне
+			Используются для асинхронной принудительной загрузки ресурса
+			*/
+			if (!config.wait) {	
+				this.ready();
+			}
+		} else {
+			if (vendor.modules.hasOwnProperty[url]) { // Resource already preloaded
+				this.module = vendor.modules[url];
+				this.ready();
+			} else {
+				this.determine();	
+			}
+		}
+	}
+
+	Resource.prototype = {
+		constructor: Resource,
+		/*
+		Данная функция определяет как именно воспринимать ресурс
+		*/
+		determine: function() {
+
+			var pure = this.url,
+			rtype = determineResourceType(this.url, this.forcetype),
+			resource = this,
+			callback = function(module) {
+
+				this.module = module;
+				this.ready();
+				
+			};
+			/*
+			Перед проверкой типа и запуском встроенного обработчика необходимо произвеси
+			проверку на участие правила rerouting. Это правило может перенаправлять обработик
+			на кастомный (указанный в настройках). Это позволит файлы с особыми параметрами 
+			обрабатывать не стандратным AMD методом, а специальным, тем не менее не разрывая
+			цепочку загрузок.
+			Кастомный метод-обработик должен содердать в переменной rerouting:[#]:handler.
+			Он будет выполнен в контексте ресурса, что позволит внутри него управлять модулем.
+
+			Для того, что бы продолжить цепь загрузок, ресурс должен получить флаг ready и модуль.
+
+			this.module = new Module(url, dependencies, factory, this.resource)
+			url - путь отправной точки ресурса
+			dependencies - зависимости модуля
+			factory - фабрика модуля
+			ссылка на старий ресурс, т.е. на этот
+
+			*/
+
+			var ok = true;
+			if ("object"===typeof Vendor.config.rerouting) {
+				for (var i = 0;i<Vendor.config.rerouting.length;i++) {
+					if (
+						Vendor.config.rerouting[i].expr&&
+						Vendor.config.rerouting[i].expr.test(pure)&&
+						(this.forcetype===false||this.forcetype===Vendor.config.rerouting[i].type)
+					) {
+						;(function(rer) {
+
+
+							if (rer.requires instanceof Array && rer.requires.length>0) {
+
+								callback = function(module) {
+									
+									vendor(rer.requires, function() {
+
+										rer.handler.apply(resource, [module].concat(Array.prototype.slice.apply(arguments)));
+									});
+								}
+							}
+							else {
+								callback = function(module) {
+									
+									rer.handler.call(resource, module);
+								}
+							}
+
+							if (rer.preventLoad) {
+								callback(null); ok = false;
+							}
+							
+						})(Vendor.config.rerouting[i]);
+						
+					}	
+				}
+			}
+
+			if (!ok) return;
+			
+			//if (this.forcetype) console.log('YOOO', rtype);
+
+			// Js file
+			switch(rtype) {
+				case 1: // javascript
+					new javascriptLoader(this, callback);
+				break;
+				case 2: // css
+					new cssLoader(this, callback);
+				break;
+				case 3: // bower
+					throw 'Bower components not supported yet';
+				break;
+				case 4: // json
+					new jsonLoader(this, callback);
+				break;
+				case 5: // image
+					new imagesLoader(this, callback);
+				break;
+				case 0: // some file
+					new fileLoader(this, callback);
 				break;
 				default:
-					var product = fabric;
+
+					throw 'Unknown resource type. '+resource.url;
 				break;
 			}
-
-			// Здесь происходит присваивание фабрики
-
-			if (name) {
-				_w.vendor.define._modules[name] = {
-					fabric: product
-				}
-			}
-
-			return product;
-		}
-
-		// Генерируем код синхроного исполнения, который будет удален функцией include, в случае успешного присваивания модуля имени файла
-		var synchCode = _w.vendor.define.synchCode = Math.random();
-
-		// В случае отсутствия имени, мы предполагаем, что данная функция вызывана из подключаемого файла, поэтому её активацию необходимо передать в специальную функцию _last, которая будет выполнена объектом include, сразе загрузки файла
-
-		if (depends instanceof Array && depends.length>0) {
-			var rand = Math.random();
-			// В случае если у данного модуля присутствуют зависимости, нам необходимо вначале загрузить их, а уже после производить активацию модуля
-			var execute = function(callback, script) {
-				
-				_w.vendor.define._last = null;
-				var src,scriptName;
-				
-				// Вычисляем url модуля
-				if ("object"===typeof script) {
-					(script.src.lastIndexOf('/')>-1) ? 
-					(src = script.src.substring(0,script.src.lastIndexOf('/')+1),
-					scriptName = script.src.substring(script.src.lastIndexOf('/')+1)) : 
-					(src=script.src,scriptName=script.src);
-				} else {
-					scriptName = 'root';
-					src = vendor._config.baseUrl;
-				}
-				
-				if (vendor.watchin(scriptName)) vendor.debugGroup(scriptName+':');
-				if (vendor.watchin(scriptName)) vendor.debuglog('Define', depends);
-				vendor.optional({
-					ownerLocation: src, // Директория в которой лежит файл, взывавший define
-					ownerScriptName: scriptName
-				}, depends, function() {
-					if (vendor.watchin(scriptName)) vendor.debuglog('Complete ', arguments);
-					if (vendor.watchin(scriptName)) vendor.debugGroupEnd(scriptName+':');
-
-					// Передаем в callback продукт фабрики
-					callback(initial.apply(window, arguments));
-				});
-			};
-
-		} else {
-			
-			var execute = function(callback, script) {
-				_w.vendor.define._last = null;
-				callback(initial.apply(window, arguments));
-			}
-
-			// Дополнительный функционал для обеспечения использования define без асинхронной загрузке
-			initial();
-		}
-
-		/* Если обработка define идет в режтме interactive мы не должны присваивать _last, а необходимо найти скрипт, который в состоянии interactive */
-		if (vendor.state.interactive) {
-			vendor.getInteractiveScript(execute);
-		} else {
-			_w.vendor.define._last = execute;
-		}
+		},
+		/*
+		Загружает скрипт
+		*/
 		
-
-		// #autoexecute
-		// Защита от использования функции define в синхронных файлах
-		// Мы должны выполнить модуль сами, если это не сделал функционал include, сразу после вызова define
-		// Исключением является случай когда у нас отсутствуют зависимости и указано имя, в таком случае мы можем инициализировать модуль моментально
-		if (depends===null && name!==null) {
-			
-			//execute(function(){});
-		} else {
-			/*
-			Этот код не верно рабоатет когда вызвается файл, содержащий Define в зависимостями
-			*/
-			/*setTimeout(function() {
-				if (!initialed) {
-					console.log('Calling execure', 804);
-					execute(function(){});
-				}
-			}, 10);*/
-		};
 	}
 
+	if ("object"!==typeof Resource.prototype.__proto__) Resource.prototype.__proto__ = Resource.prototype;
 
-	_w.vendor.define._modules = {
-		'module' : null,
-		'exports' : null,
-		'vendor' : vendor
-	};
-	_w.vendor.define._last = null;
-	vendor.define.amd = {}
+	module.exports = Resource;
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isInteractiveMode = __webpack_require__(14);
+
+	var javascriptLoader = function(resource, callback) {
+		this.resource = resource;
+		this.callback = callback;
+		this.script = null;
+		
+		this.loadScript();
+	}
+
+	javascriptLoader.prototype = {
+		constructor: javascriptLoader,
+		loadScript: function() {
+
+			var that = this;
+			/* Создаем элемент SCRIPT без присвоения к документу, это вынужденное действие для работы с IE8 */
+	        this.script = document.createElement("SCRIPT");
+	       
+	        this.script.setAttribute("type", "text/javascript");
+	        this.script.setAttribute("async", true);
+
+	        /*
+			Проверка на interactive необходимо для правильного связывания define со скриптом.
+			В IE срабатывание скрипта может происходить не сразу после загрузки скрипта. 
+			Поэтому данный скрипт должен быть заморожен до момета вызова define.
+	        */
+	        if (isInteractiveMode(this.script)) {
+	        	/*
+				Активируем режим интерактив
+	        	*/
+	        	vendor.interactive = true;
+	        	var id = vendor.interactiveScripts.length;
+	        	vendor.interactiveScripts.push({
+	        		clear: function() {
+	        			/*
+						При очистке скрипта ожидающего выполнения, мы вызывает тест на зевершение загрузки указывая,что он в режиме interactive
+	        			*/
+	        			vendor.interactiveScripts[id] = null;
+	        			that.readytest(true);
+	        		},
+	        		node: this.script   		
+	        	})
+	        	this.script.onload = this.script.onreadystatechange = function() {
+		 			if (this.script.readyState==='loaded'||this.script.readyState==='complete') {
+		 				this.readytest();
+		 			}
+		 		}.bind(this)
+			} else {
+				this.script.onload = this.script.onreadystatechange = function() {
+					this.readytest();
+				}.bind(this);
+			}
+			/*
+			Сообщаем движку, что в данный момент происходит загрузка javascript ресурса
+			*/
+			vendor.processed['js']++;
 
 
-	_w.vendor.requirecss = function(b, f) {
+	        this.script.src = this.resource.url;
 
-		if (typeof b != "object") {
-			b = [b]
-		}
-		for (var c = 0; c < b.length; c++) {
-			var a = b[c].substr(b[c].length - 4, 4) != ".css" ? b[c] + ".css" : b[c];
+	        (function() {
+	          return document.documentElement || document.getElementsByTagName("HEAD")[0];
+	        })().appendChild(this.script);
+		},
+		readytest: function(interactive) {
 
-			a = vendor.makeAbsFilePath(a);
-
-			if (is_safari) {
-				/* 
-				Safari отказывается слушать событие onload link эелемента, поэтому мы его обманем
-				Это решение от ZACH LEATHERMAN (http://www.zachleat.com/web/load-css-dynamically/)
+			if (!this.script.readyState || this.script.readyState === "loaded" || this.script.readyState === "complete" || interactive) {
+				/*
+				Сообщаем движку, что в данный загрузка одного javascript ресурса завершена
 				*/
-				var id = 'dynamicCss' + (new Date).getTime();
-				var s = document.createElement("STYLE");
-				s.setAttribute("type","text/css");
-				s.setAttribute("id",id);
-				s.innerHTML = '@import url(' + a + ')';
-				s = function() {
-					return document.documentElement || document.getElementsByTagName("HEAD")[0]
-				}().appendChild(s);
-				var poll,poll = function() {
-				    try {
-				        var sheets = document.styleSheets;
-				        for(var j=0, k=sheets.length; j<k; j++) {
-				            if(sheets[j].ownerNode.id == id) {
-				                sheets[j].cssRules;
-				            }
-				        }
-				       
-				        f();
-				    } catch(e) {
-				        window.setTimeout(poll, 50);
-				    }
-				};
-				window.setTimeout(poll, 50);
+				vendor.processed['js']--;
+				/*
+				Чистим память
+				*/
+				this.script.onload = this.script.onreadystatechange = null;
+				/* Удаляем скрипт */
+	          	try {
+	              	(function() {
+	                  return document.documentElement || document.getElementsByTagName("HEAD")[0];
+	                })().removeChild(this.script);
+	            } catch(e) {
+	            	if (typeof console=="object" && "function"==typeof console.log)
+	            	if (_w.vendor.debugMode) console.log('vendor.js: script node is already removed by another script', j);
+	            }
+	            /*
+				После завершения загрузки скрипта мы должны обеспечить обратное связывание с define
+	            */	    
+	           
+
+	            this.throughDefine(function() {
+	            	this.callback.call(this.resource, this.module);
+	            }.bind(this));
+			}
+		},
+		/*
+		Функция проверяет был ли вызван define внутри файла
+		*/
+		throughDefine: function(callback) {
+			
+			if ("object"===typeof vendor.last&&vendor.last!==null) {
+				
+				this.module = new vendor.Module(vendor.last.name||this.resource.url, vendor.last.depends, vendor.last.factory, this.resource);
+				vendor.last = null;
+			} else {
+				this.module = new vendor.Module(this.resource.url, [], null, this.resource);
+			}
+
+			this.module.ready(function() {
+				callback()
+			});
+		}
+	}
+
+	module.exports = javascriptLoader;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	var cssLoader = function(resource, callback) {
+		this.resource = resource;
+		this.callback = callback;
+		var that = this;
+
+		this.load();
+	}
+
+	cssLoader.prototype = {
+		constructor: cssLoader,
+		load: function() {
+			var that = this;
+			if (Vendor.browser.is_safari) {
+				/*
+				Код взят с https://github.com/guybedford/require-css/blob/master/css.js
+				*/
+
+				var head = document.getElementsByTagName('head')[0];
+
+			  var engine = window.navigator.userAgent.match(/Trident\/([^ ;]*)|AppleWebKit\/([^ ;]*)|Opera\/([^ ;]*)|rv\:([^ ;]*)(.*?)Gecko\/([^ ;]*)|MSIE\s([^ ;]*)|AndroidWebKit\/([^ ;]*)/) || 0;
+
+			  // use <style> @import load method (IE < 9, Firefox < 18)
+			  var useImportLoad = false;
+			  
+			  // set to false for explicit <link> load checking when onload doesn't work perfectly (webkit)
+			  var useOnload = true;
+
+			  // trident / msie
+			  if (engine[1] || engine[7])
+			    useImportLoad = parseInt(engine[1]) < 6 || parseInt(engine[7]) <= 9;
+			  // webkit
+			  else if (engine[2] || engine[8])
+			    useOnload = false;
+			  // gecko
+			  else if (engine[4])
+			    useImportLoad = parseInt(engine[4]) < 18;
+
+
+				var curStyle, curSheet;
+			  var createStyle = function () {
+			    curStyle = document.createElement('style');
+			    head.appendChild(curStyle);
+			    curSheet = curStyle.styleSheet || curStyle.sheet;
+			  }
+			  var ieCnt = 0;
+			  var ieLoads = [];
+			  var ieCurCallback;
+			  
+			  var createIeLoad = function(url) {
+			    curSheet.addImport(url);
+			    curStyle.onload = function(){ processIeLoad() };
+			    
+			    ieCnt++;
+			    if (ieCnt == 31) {
+			      createStyle();
+			      ieCnt = 0;
+			    }
+			  }
+			  var processIeLoad = function() {
+			    ieCurCallback();
+			 
+			    var nextLoad = ieLoads.shift();
+			 
+			    if (!nextLoad) {
+			      ieCurCallback = null;
+			      return;
+			    }
+			 
+			    ieCurCallback = nextLoad[1];
+			    createIeLoad(nextLoad[0]);
+			  }
+			  var importLoad = function(url, callback) {
+			    if (!curSheet || !curSheet.addImport)
+			      createStyle();
+
+			    if (curSheet && curSheet.addImport) {
+			      // old IE
+			      if (ieCurCallback) {
+			        ieLoads.push([url, callback]);
+			      }
+			      else {
+			        createIeLoad(url);
+			        ieCurCallback = callback;
+			      }
+			    }
+			    else {
+			      // old Firefox
+			      curStyle.textContent = '@import "' + url + '";';
+
+			      var loadInterval = setInterval(function() {
+			        try {
+			          curStyle.sheet.cssRules;
+			          clearInterval(loadInterval);
+			          callback();
+			        } catch(e) {}
+			      }, 10);
+			    }
+			  }
+
+			  // <link> load method
+			  var linkLoad = function(url, callback) {
+			    var link = document.createElement('link');
+			    link.type = 'text/css';
+			    link.rel = 'stylesheet';
+			    if (useOnload)
+			      link.onload = function() {
+			        link.onload = function() {};
+			        // for style dimensions queries, a short delay can still be necessary
+			        setTimeout(callback, 7);
+			      }
+			    else
+			      var loadInterval = setInterval(function() {
+			        for (var i = 0; i < document.styleSheets.length; i++) {
+			          var sheet = document.styleSheets[i];
+			          if (sheet.href == link.href) {
+			            clearInterval(loadInterval);
+			            return callback();
+			          }
+			        }
+			      }, 10);
+			    link.href = url;
+			    head.appendChild(link);
+			  }
+
+			  importLoad(this.resource.url, function() {
+			  	that.callback.call(that.resource, null);	
+			  });
 			} else {
 				var d = document.createElement("LINK");
 
 				d.onload = function(e) { 
-					
-					f(e);
+					 that.callback.call(that.resource, null);	
 				};
 				var d = function() {
-					return document.documentElement || document.getElementsByTagName("HEAD")[0]
+					return document.getElementsByTagName("HEAD")[0] || document.documentElement
 				}().appendChild(d);
 				d.setAttribute("rel", "stylesheet");
-				d.href = a
+				d.setAttribute("type", "text/css");
+				d.href = this.resource.url;
 			}
 		}
 	}
 
-	_w.vendor.getJson = function(path, callback) {
+	module.exports = cssLoader;
 
-		var xobj = new XMLHttpRequest();
-	    if (xobj.overrideMimeType) xobj.overrideMimeType("application/json");
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
 
-		xobj.onreadystatechange = function (e) {
-			
-	          if (xobj.readyState === 4 && xobj.status == "200") {
-	            
-	            var actual_JSON = JSON.parse(xobj.responseText);
+	var getXmlHttp = __webpack_require__(8);
 
-	            callback(actual_JSON);
-	          }
-	    };
-
-	    xobj.open('GET', path, true); // Replace 'my_data' with the path to your file
-	       
-		xobj.send(null);
-	}
-
-	_w.vendor.load = function(path, callback) {
-
-		var xobj = new XMLHttpRequest();
-	    if (xobj.overrideMimeType) xobj.overrideMimeType("application/octet-stream");
-
-		xobj.onreadystatechange = function (e) {
-			
-	          if (xobj.readyState === 4 && xobj.status == "200") {
-	            
-	            callback(xobj.responseText);
-	          }
-	    };
-
-	    xobj.open('GET', path, true); // Replace 'my_data' with the path to your file
-	       
-		xobj.send(null);
-	}
-
-	/* 
-	Функция преобраузет относительный путь в абсолютный, основываясь на знаниях местонахождения домашней директории vendor.
-	! Путь, начинающийся с / всегда подставляется к домену сайта (_w.location.origin)
-	! Если вначале пути не следует / то будет подставлено текущее глобальное значение _config.baseUrl или baseUrl, указанный во втором аргументе
-	*/
-	_w.vendor.makeAbsPath = function(path, baseUrl) {
-		var absloc = (path.length>0) ? (path + (path.substr(-1, 1)==='/' ? '' : '/')) : path;
-		(absloc.substr(0,4).toLowerCase()!='http') && ( (absloc.substring(0,1)==='/') ? (absloc = _w.location.origin+absloc) : (absloc = (baseUrl||_w.vendor._config.baseUrl)+absloc));
-		return absloc;
-	}
-
-	/*
-	Аналог makeAbsPath, только без указания / в конце
-	*/
-	_w.vendor.makeAbsFilePath = function(fn, baseUrl) {
-		var filename = (function(path) { var qp = path.lastIndexOf('/'); if (qp<0) qp = -1; return path.substring(qp+1,path.length); })(fn);
-		var path = fn.substring(0,fn.length-filename.length);
-		var absloc = (path.length>0) ? (path + (path.substr(-1, 1)==='/' ? '' : '/')) : path;
-		(absloc.substr(0,4).toLowerCase()!='http') && ( (absloc.substring(0,1)==='/') ? (absloc = _w.location.origin+absloc) : (absloc = (baseUrl||_w.vendor._config.baseUrl)+absloc));
+	var fileLoader = function(resource, callback) {
 		
-		return absloc+filename;
+		this.resource = resource;
+		
+		this.callback = callback;
+		var that = this;
+		this.load(function(err, data) {
+			var module;
+
+			if (err) {
+				throw err;
+				module = null;
+			} else {
+				module = {
+					exports: data
+				}
+			}
+			that.callback.call(that.resource, module);
+		});
 	}
 
-	_w.bower = _w.vendor.bower = function(r, callback) {
-		if ("object"!==typeof r) r = [r];
-		
-		var run = function() {
-			new (function(paths, callback) {
+	fileLoader.prototype = {
+		constructor: fileLoader,
+		load: function(callback) {
+			var xobj = getXmlHttp();
+		    if (xobj.overrideMimeType) xobj.overrideMimeType("application/x-www-form-urlencoded");
 
-				this.paths = paths;
-				this.bpackages = [];
-				this.callback = callback;
-				this.loadings = 0;
+			xobj.open('GET', this.resource.url, !this.resource.sync);
+			xobj.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+			xobj.onreadystatechange = function() {
+				 if (xobj.readyState == 4) {
 
-				this.execute = function() {
-					
-					for (var i = 0;i<this.paths.length;i++) {
-						if ("string"!==typeof this.paths[i]) {
-							// Throw error
-							throw "vendor.js: The path to bower component is not a string"; 
-							return false;
-						};
-						this.getBowerPackage(this.paths[i]);
+					if(xobj.status == 200) {
+
+						callback(false, xobj.response||xobj.responseText);
+					} else {
+
+						callback(true, xobj.responseText);
 					}
+				}
+		    };
+
+		    xobj.send(this.resource.post ? queryString(this.resource.post) :  null);
+		}
+	}
+
+	module.exports = fileLoader;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	var imagesLoader = function(resource, callback) {
+		this.resource = resource;
+		this.callback = callback;
+	}
+
+	imagesLoader.prototype = {
+		constructor: imagesLoader,
+		load: function() {
+			var img = new Image(), that = this;
+
+			img.onload = img.onerror = function() {
+				that.callback.call(that.resource, img);
+			}
+			
+			img.src = this.resource.src;
+		}
+	}
+
+	module.exports = imagesLoader;
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var getXmlHttp = __webpack_require__(8);
+	var jsonLoader = function(resource, callback) {
+		this.resource = resource;
+		this.callback = callback;
+		var that = this;
+		this.load(function(json) {
+
+			that.callback.call(that.resource, {
+				exports: json
+			});
+		});
+	}
+
+	jsonLoader.prototype = {
+		constructor: jsonLoader,
+		load: function(callback) {
+
+			var xobj = getXmlHttp(),self=this;
+		    if (xobj.overrideMimeType) xobj.overrideMimeType("application/json");
+
+			xobj.onreadystatechange = function (e) {
+				
+		          if (xobj.readyState === 4 && xobj.status == "200") {
+		            
+		            try {
+		            	var actual_JSON = JSON.parse(xobj.responseText);
+		            } catch(e) {
+		            	throw 'Corrupted JSON file: '+self.resource.url;
+		            }
+
+		            callback(actual_JSON);
+		          }
+		    };
+
+		    xobj.open('GET', this.resource.url, !this.resource.sync);
+		       
+			xobj.send(null);
+		}
+	}
+
+	module.exports = jsonLoader;
+
+/***/ },
+/* 22 */
+/***/ function(module, exports) {
+
+	module.exports = function(object, proto) {
+		for (var prop in proto) {
+			if (proto.hasOwnProperty(prop)) {
+				if ("object"===typeof proto[prop]) {
+					object[prop] = new Object(proto[prop]);
+				} else {
+					object[prop] = proto[prop];
 				}
 
 				this.getBowerPackage = function(path) {
@@ -1208,125 +1880,379 @@
 
 				this.max = this.loadings;
 			}
-			this.loadImage = function(src, first) {
-				var that = this;
-				this.loadings++;
-				img = new Image(), that = this;
-
-				img.onload = img.onerror = function() {
-
-					that.loaded(img);
-				}
-				this.images.push(img);
-				img.src = src;
-			};
-			this.loaded = function(res) {
-				this.loadings--;
-				this.progress = 1-(this.loadings/this.max);
-				if (this.eachCallback) this.eachCallback.call(this, res);
-				if (this.loadings===0) this.done();
-			};
-			this.done = function() {
-				if ("function"===typeof this.callback) this.callback.apply(window, this.images);
-			};
-			// Позволяет вместо единой функции callback указать callback для каждого загруженного ресурса
-			this.each = function(callback) {
-				this.eachCallback = callback;
-			}
-			this.execute();
-		})(imgs, callback);
-		return progressor;
-	}
-
-	/* Register global */
-	_w.define = _w.vendor.define;
-	_w.require = _w.vendor.require;
-
-	/* Автоопределение положения vendor */
-	if (typeof _w.vendor === "function" && typeof _w.vendor.brahmaInside === "boolean") {
-
-		(function() {
-			var g = document.getElementsByTagName("SCRIPT");
-			var srci = false, bsk = false, bwk = false;
-			for (var j in g) {
-				
-				if (typeof g[j].attributes == "object") {
-					// Search for src					
-					for (var z=0;z<g[j].attributes.length;z++) {
-						if (g[j].attributes[z].name.toLowerCase()==='src') {
-							
-							if (z!==false && typeof g[j].attributes === "object" && typeof g[j].attributes[z] === "object" && g[j].attributes[z] != null && /vendor\.js/.test(g[j].attributes[z].value)) {
-								
-								srci = z;
-								break;
-							};
-						};
-					}
-				}
-				if (srci!==false) {
-					
-					// Search for baseUrl					
-					for (var z=0;z<g[j].attributes.length;z++) {
-
-						if (g[j].attributes[z].name.toLowerCase()==='baseurl') {
-
-							bsk = z;
-							break;
-						};
-					}
-					// Search for bowerComponents					
-					for (var z=0;z<g[j].attributes.length;z++) {
-						if (g[j].attributes[z].name.toLowerCase()==='bower-components') {
-							bwk = z;
-							break;
-						};
-					}
-					// Parse location
-					var f = document.location.href;
-					if (f.lastIndexOf('/')>7) f = f.substring(0, f.lastIndexOf('/'));
-					
-					if (f.substr(-1)=='/') f = f.substr(0,-1);
-
-					if (bsk!==false) {
-						
-						var h = g[j].attributes[bsk].value;
-						
-						if (h.substr(0,1)==='/') {
-							var match = f.match(/^(http?[s]?:\/\/[^\/]*)/);
-							if (match!==null) f = match[1];
-						}
-						var baseUrl = (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)==='/' ? '' : '/') + h);
-						
-					}
-					else {
-						
-						var i = g[j].attributes[srci].value.toLowerCase();
-						var h = i.split("vendor.js");
-						var baseUrl = (h[0].substr(0,5)=='http:') ? h[0] : (f + (h[0].substr(0,1)=='/' ? '' : '/') + h[0])+(h[0].substr(h[0].length-1, 1)==='/' ? '' : '');
-							
-					}
-					if (baseUrl.substr(baseUrl.length-1, 1)!=='/') baseUrl=baseUrl+'/';
-					
-					_w.vendor.config({
-						baseUrl: baseUrl,
-						bowerComponentsUrl: ((bwk!==false) ? (function() {
-						var h = g[j].attributes[bwk].value;
-						return (h.substr(0,5).toLowerCase()==='http:') ? h : (f + (h.substr(0,1)=='/' ? '' : '/') + h)+(h.substr(h.length-1, 1)==='/' ? '' : '');
-					})() : baseUrl+"bower_components/"),
-						noBowerrc: g[j].getAttribute('no-bowerrc') ? true : false
-					});
-					// import
-					vendor.selfLocationdefined = true;
-					// Search for import
-					if (g[j].getAttribute('data-import')) {
-						vendor.defineDataImport = g[j].getAttribute('data-import');
-						vendor.require(g[j].getAttribute('data-import'));
-					}
-					break;
-				}				
-			}
-		})()
+		}
 	};
 
-	
-})(window);
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var charge = __webpack_require__(22);
+	var Resource = __webpack_require__(16);
+	var events = __webpack_require__(7);
+
+		/*
+		Модуль. Состоит из лчиного имени, списка зависимостей и скрипта владельца.
+		Скрипт отличается от модуля тем, что скрипт - это файл Javascript, а модуль AMD сущность, которая помещается внутрь define.
+		Модуль должен инициализироваться и иметь свойство ready не равным false;
+		*/
+		var regForceType = /^([a-z]*)!/i;
+		var Module = function(name, dependencies, factory, caller) {
+			var that = this;
+			this.name = name;
+			this.ready = false;
+			this.exports = null;
+			this.caller = caller;
+			this.location = caller.location;
+			this.factory = factory;
+			this.eventListners = {};
+			this.isready = false;
+			this.watch = !!caller.watch;
+			this.sync = caller.sync || false;
+
+			/*
+			Расширяем модуль событиями
+			*/
+			charge(this, events);
+			/*
+			Перечень компонентов необходимых для работы модуля. Он формируется на основе списка dependencies.
+			*/
+			this.resources = [];
+			/*
+			Приводим ресурсы к массиву
+			*/
+			if (dependencies===null) dependencies = [];
+			if (!(dependencies instanceof Array)) dependencies = [dependencies];
+
+			/*
+			Формируем данные для сбора статистики
+			*/
+			this.total = dependencies.length; /* Общее количество ресурсов */
+			this.left = this.total; /* Сколько осталось загрузить */
+
+			/*
+			Запускаем таймер, который будет осчитывать время до момента, когда будет выброшено исключение
+			по слишком долгой загрузке скрипта. Время таймаута указывается в настройках.
+			*/
+			this.timeout = setTimeout(function() {
+				if (this.left>0) {
+					console.error('...', that, dependencies);
+					throw 'Timeout for module';
+				}
+			}.bind(this), vendor.config.timeout);
+
+			/*
+			Приводим url зависимостей к абсолютному формату
+			*/
+			var loadings=0,ready=function() {
+				loadings--;
+				if (loadings===0) {
+
+					that.load();
+				}
+			};
+			loadings++;
+			dependencies.forEach(function(src, index) {
+
+				/*
+				Вначале обеспечиваем поиск в предопределенных модулях
+				*/
+				var gotya = false;
+				
+				for (var moduleurl in vendor.modules) {
+					if (vendor.modules.hasOwnProperty(moduleurl)) {
+						if (src.substr(0, moduleurl.length)===moduleurl) {
+							gotya = true;
+
+							/*
+							Получаем список опций
+							*/
+							var options = src.substr(moduleurl.length+1);
+							/*
+							Мы можем применить опции только если модуль обладает методом refactory
+							*/
+							if (options.length>0&&"function"===typeof vendor.modules[moduleurl].refactory) {
+								options = options.split('|');	
+								loadings++;
+								that.resources[index] = new Resource(src, {
+									root: that.caller.root,
+									exports: true,
+									wait: true, // Пусть ждет нас
+									sync: that.caller.sync // Синхронно
+								});
+								//console.log('refactory', index);
+								vendor.modules[moduleurl].refactory(options, function(content) {
+									that.resources[this].module.exports = content;
+									that.resources[this].ready();
+									//console.log('set data to', index, moduleurl, options, content, this, Vendor.modules[moduleurl].exports);
+									//console.log('this.resources', that.resources);
+									ready();
+								}.bind(index));
+
+							} else {
+								
+								this.resources[index] = new Resource(src, {
+									root: this.caller.root,
+									exports: vendor.modules[moduleurl].exports,
+									sync: that.caller.sync // Синхронно
+								});
+							}
+						}
+					}
+				}
+				if (!gotya) {
+					/*
+					Рассматриваем вариант принудительного типа
+					*/
+					if (regForceType.test(src)) {
+
+						var forcetype = regForceType.exec(src)[1];
+						src = src.substr(forcetype.length+1);
+					} else {
+						forcetype = false;
+					}
+					var url = this.determine(src);
+
+					this.resources[index] = vendor.get(url, {
+						root: this.caller.root,
+						sync: that.caller.sync,
+						forcetype: forcetype
+					});
+				}
+				
+			}.bind(this));
+			ready();
+			/*
+			Создаем визуальный дебагинг
+			*/
+
+			if (vendor.config.visualDebugger) {
+				document.querySelector('body').innerHTML = '';
+				this.debugVisualElements = {};
+				this.debugVisualElements.box = document.createElement('div');
+				this.debugVisualElements.box.style.width = "30%";
+				this.debugVisualElements.box.style.float = "left";
+				this.debugVisualElements.box.style.boxSizing = "border-box";
+				this.debugVisualElements.box.style.border = "1px gray solid";
+				this.debugVisualElements.box.style.padding = "10px";
+				this.debugVisualElements.box.style.margin = "1%";
+				document.querySelector('body').appendChild(this.debugVisualElements.box);
+				this.debugVisualElements.box.innerHTML = '<strong>'+this.name+'</strong>';
+
+				this.debugVisualElements.dependsBox = document.createElement('ul');
+				this.debugVisualElements.box.appendChild(this.debugVisualElements.dependsBox);
+				this.debugVisualElements.depends = {};
+
+				this.resources.forEach(function(res, index) {
+					this.debugVisualElements.depends[res.url] = document.createElement('li');
+					this.debugVisualElements.depends[res.url].innerHTML = res.url;
+					this.debugVisualElements.dependsBox.appendChild(this.debugVisualElements.depends[res.url]);
+				}.bind(this));
+			}
+			
+			
+		}
+
+		Module.prototype = {
+			constructor: Module,
+			/*
+			Возаращет абсолютный url для релативного пути от текущей директории
+			*/
+			getUrl: function(url) {
+				return this.determine(url);
+			},
+			/*
+			Приведение url к абсолютному виду. На данном этапе происходит фильтрация url по относительности, алиасам и пр.
+
+			* Если путь начинается на ./ он рассматривает как относительный от файла из которого он вызван
+			* Если вначале пути указан слеш /, то путь расчитывается от корня сайта
+			* Если путь начинается с имени, без слешей, он расчитывается относительно пути, который определен как baseurl
+			* Если путь начинается по маске [a-z]// значит использован алиас. После указания алиаса обязательно должен быть указан двойной слеш
+
+			*/
+
+			determine: function(url) {
+				
+				return vendor.absolutizer(url, {
+					location:this.caller.location, 
+					root: this.caller.root.location,
+					aliases: vendor.config.aliases
+				});
+				
+			},
+			/*
+			Обеспечиваем запуск модуля по готовности его ресурсов
+			*/
+			load: function() {
+				var module = this;
+				if (this.resources.length===0)
+				this.perform();
+				else {
+					this.resources.forEach(function(resource, i) {
+						var that = this;
+
+						resource.ready(function() {
+							/*
+							Отладочная запись
+							*/
+							if (vendor.config.visualDebugger) { that.debugVisualElements.depends[this.url].style.color = 'green'; }
+							that.left--;
+							
+							if (that.left<=0) {
+								
+								that.perform();
+
+							}
+						});
+					}.bind(this));
+				}
+			},
+			/*
+			Выполнение модуля
+			*/
+			perform: function() {
+				var module = this;
+				var args = [];
+				this.resources.forEach(function(resource) {
+					/*
+					При загрузке не javascript модуля, а, скажем, css файла переменная модуль не формируется. Поэтому необходимо проводить
+					проверку на условие его наличия перед присвоением. Не Javascript модули присваиваются как null. Это относится к CSS и 
+					другим возможным форматам не возвращающим данные.
+					*/
+					args.push(resource.module&&resource.module.exports||null);
+					
+				}.bind(this));
+				if ("function"===typeof this.factory) {
+					
+						// /console.log('Init factory', module.location,  module.factory.toString());
+						module.exports = module.factory.apply(module, args);
+					
+					
+				} else {
+					this.exports = this.factory;
+				}
+
+				
+
+				
+
+					this.ready();
+
+					// Добавляем в список глобальных модулей, если присутствует четкое имя
+					if (this.name!==null) {
+						
+						Vendor.registerModule(this.name, this);
+					}
+				
+			}
+		};
+
+		if ("object"!==typeof Module.prototype.__proto__) Module.prototype.__proto__ = Module.prototype;
+
+		module.exports = Module;
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Vendor = __webpack_require__(15);
+	var $inject = __webpack_require__(9);
+
+
+		var Define = Vendor.define = function(g, e, b) {
+			
+			// Если передана только фабрика
+			if (arguments.length==1) {
+				b=g; g=null; e=null;
+			}
+
+			// Если передано два аргумента
+			else if (arguments.length==2) {
+				// Переданы зависимости и фабрика
+				("object"==typeof g) && (b=e,e=g,g=null);
+				// Передано имя и фабрика
+				("string"==typeof g) && (b=e,e=0);
+			}
+			// Переданы все аргументы
+			else {
+				"string" != typeof g && (b = e, e = g, g = null);
+				!(e instanceof Array) && (b = e, e = 0);
+			}
+
+			// Формируем humanfrendly переменные
+			var name = g || null;
+			var depends = e || null;
+			var factory = b || null;
+
+			/*
+			Преобразуем объект в factory
+			*/
+			if (typeof factory != "function")
+		        factory = function() {
+		            return this;
+		        }.bind(factory)
+
+		    /*
+		    Внедряем injectors в module
+		    #injector
+		    */
+		    factory = $inject.call({
+		        require: Vendor,
+		        exports: {},
+		        module: {}
+		    }, factory);
+		    /* ^#injector */
+
+			/*
+			Если процесс работает в режиме interactive мы игнорируем систему last и находим интерактивный скрипт
+			*/
+			if (Vendor.interactive) {
+				Vendor.getInteractiveScript({
+					name: name,
+					depends: depends,
+					factory: factory
+				});
+			}
+			/*
+			Отправляем запрос в вендер на предмет того, есть ли сейчас активные загружаемые файлы.
+			Если их нет, то мы воспринимам данный код как произвольный и создаем новый анонимный модуль.
+			*/
+			else if (Vendor.last===null && Vendor.isProcessed()) {
+				if (name!==null) {
+					/*
+					Похоже что внутри загружаемого модуля производится define еще одного модуля,
+					но возможно и того же. Поэтому в случае если имя указано, мы производим запись
+					в модуль, но продолжаем слушать last
+					*/
+					Vendor.anonymModule(name, depends, factory);
+				}
+				Vendor.last = {
+					name: name,
+					depends: depends,
+					factory: factory
+				}
+			} else {
+				Vendor.anonymModule(name, depends, factory);
+			}	
+		}
+
+		Define.amd = {};
+
+		module.exports = Define;
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	module.exports = Object.create(null, {
+		"exports": {
+			set: function(module) {
+				Vendor.define(function() {
+					return module;
+				});
+			}
+		}
+	});
+
+/***/ }
+/******/ ]);
