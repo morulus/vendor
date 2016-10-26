@@ -12,24 +12,23 @@ module.exports = function(url) {
         domain=protdom[2];
     } else {
         
-        protocol='http';
+        protocol=false;
         domain=url;
     }
 
-    var firstSlash = domain.substr(0,1)==='/';
     var urlp = domain.split('/');
 
     var res = [];
     for (var i = 0;i<urlp.length;++i) {
-        if (urlp[i]==='') continue;
+        if (urlp[i]==='' && i!==0) continue;
         if (urlp[i]==='.') continue;
         if (urlp[i]==='..') { res.pop(); continue; }
         res.push(urlp[i]);
     }
-    
-    if (firstSlash) {
-        return '/'+res.join('/');
-    } else {
+
+    if (protocol) {
         return protocol+'://'+res.join('/');
+    } else {
+        return res.join('/');
     }
 };
