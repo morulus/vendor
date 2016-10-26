@@ -501,14 +501,12 @@
 	        domain=protdom[2];
 	    } else {
 	        
-	        protocol='http://';
+	        protocol='http';
 	        domain=url;
 	    }
 
+	    var firstSlash = domain.substr(0,1)==='/';
 	    var urlp = domain.split('/');
-	    
-
-
 
 	    var res = [];
 	    for (var i = 0;i<urlp.length;++i) {
@@ -517,8 +515,12 @@
 	        if (urlp[i]==='..') { res.pop(); continue; }
 	        res.push(urlp[i]);
 	    }
-
-	    return protocol+'://'+res.join('/');
+	    
+	    if (firstSlash) {
+	        return '/'+res.join('/');
+	    } else {
+	        return protocol+'://'+res.join('/');
+	    }
 	};
 
 /***/ },
@@ -863,6 +865,17 @@
 			// Amd request
 			Vendor.anonymModule(false, resources, callback, options||{});
 		}
+	}
+
+	/**
+	 * Similar to vendor(), but returns Promise
+	 * @param  {[type]} resources [description]
+	 * @return {[type]}           [description]
+	 */
+	Vendor.async = function(resources) {
+		return new Promise(function(resolve, reject) {
+			this(resources, resolve);
+		}.bind(Vendor));
 	}
 
 	Vendor.Module = Module;

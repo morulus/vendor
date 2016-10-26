@@ -12,14 +12,12 @@ module.exports = function(url) {
         domain=protdom[2];
     } else {
         
-        protocol='http://';
+        protocol='http';
         domain=url;
     }
 
+    var firstSlash = domain.substr(0,1)==='/';
     var urlp = domain.split('/');
-    
-
-
 
     var res = [];
     for (var i = 0;i<urlp.length;++i) {
@@ -28,6 +26,10 @@ module.exports = function(url) {
         if (urlp[i]==='..') { res.pop(); continue; }
         res.push(urlp[i]);
     }
-
-    return protocol+'://'+res.join('/');
+    
+    if (firstSlash) {
+        return '/'+res.join('/');
+    } else {
+        return protocol+'://'+res.join('/');
+    }
 };
